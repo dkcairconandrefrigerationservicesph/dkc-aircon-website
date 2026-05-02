@@ -18,6 +18,12 @@
     box-sizing: border-box;
 }
 
+html,
+body {
+    width: 100%;
+    overflow-x: hidden;
+}
+
 html {
     scroll-behavior: smooth;
 }
@@ -36,6 +42,13 @@ body {
     overflow-x: hidden;
     padding-top: 84px;
     position: relative;
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
 body.is-loading {
@@ -391,6 +404,12 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
     .loader-mist,
     .loader-particles span,
     .loader-logo-wrap::before,
@@ -441,35 +460,33 @@ textarea {
 
 .nav-toggle {
     display: none;
-    width: 44px;
-    height: 44px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.18);
     color: var(--text);
     cursor: pointer;
     position: relative;
     align-items: center;
     justify-content: center;
-    transition: background 0.25s ease, transform 0.25s ease;
+    transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    padding: 0;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.14);
 }
 
 .nav-toggle:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.26);
     transform: translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(79,212,255,0.35), 0 18px 30px rgba(0,0,0,0.18);
 }
 
-.nav-toggle span {
+.nav-toggle-icon {
     display: block;
-    width: 20px;
-    height: 2px;
-    background: #eef4ff;
-    border-radius: 999px;
-    transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-.nav-toggle span + span {
-    margin-top: 6px;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    filter: invert(1) brightness(2);
 }
 
 .mobile-menu {
@@ -541,11 +558,29 @@ body {
     text-decoration: none;
 }
 
+.nav-brand-copy {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
 .nav-logo {
     width: 42px;
     height: 42px;
     object-fit: contain;
     flex-shrink: 0;
+}
+
+.nav-device-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    object-fit: contain;
+}
+
+.nav-device-icon--mobile {
+    display: none;
 }
 
 .nav-title {
@@ -2137,6 +2172,37 @@ section {
         margin-bottom: 28px;
     }
 
+    .contact-form-message {
+        display: none;
+        width: 100%;
+        padding: 18px 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(77, 199, 255, 0.28);
+        background: rgba(77, 199, 255, 0.12);
+        color: #eafcff;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .contact-form-message a {
+        color: #a9f2ff;
+        text-decoration: underline;
+    }
+
+    .contact-form-message.error {
+        border-color: rgba(255, 118, 118, 0.4);
+        background: rgba(255, 118, 118, 0.12);
+        color: #ffe3e3;
+    }
+
+    .contact-form-message.success {
+        display: block;
+    }
+
+    .contact-form-message.error {
+        display: block;
+    }
+
     .contact-form label {
         display: grid;
         gap: 10px;
@@ -2278,8 +2344,16 @@ section {
     }
 
     .nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         padding: 0 20px;
-        grid-template-columns: auto 1fr auto;
+    }
+
+    .nav-brand {
+        flex: 1;
+        min-width: 0;
     }
 
     .nav-menu {
@@ -2288,17 +2362,22 @@ section {
 
     .nav-toggle {
         display: inline-flex;
+        order: 2;
+        margin-left: auto;
     }
 
     .nav-title {
         font-size: 13px;
         visibility: hidden;
         position: relative;
-        max-width: 110px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .nav-title::after {
-        content: "DKC Services";
+        content: "DKC Refrigiration & Airconditioning";
         visibility: visible;
         position: absolute;
         left: 0;
@@ -2306,15 +2385,25 @@ section {
         white-space: nowrap;
     }
 
+    .nav-device-icon--desktop {
+        display: none;
+    }
+
+    .nav-device-icon--mobile {
+        display: inline-flex;
+    }
+
     .nav-cta {
-        min-width: 110px;
+        min-width: 96px;
         height: 42px;
-        padding: 0 18px;
+        padding: 0 16px;
         font-size: 13px;
+        order: 3;
     }
 
     .mobile-menu {
         inset: 70px 0 0;
+        max-height: calc(100vh - 70px);
     }
 
     .profile-grid,
@@ -2419,6 +2508,7 @@ section {
 
     .nav-title {
         font-size: 11px;
+        max-width: 140px;
     }
 
     .hero-title {
@@ -2444,6 +2534,223 @@ section {
     .nav-toggle {
         width: 42px;
         height: 42px;
+    }
+}
+
+@media (max-width: 980px) {
+    .nav-container {
+        grid-template-columns: auto 1fr auto;
+        padding: 0 20px;
+    }
+
+    .nav-brand {
+        max-width: calc(100vw - 180px);
+        overflow: hidden;
+    }
+
+    .nav-title {
+        font-size: 13px;
+        visibility: hidden;
+        position: relative;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-title::after {
+        content: "DKC Refrigiration & Airconditioning";
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+        white-space: nowrap;
+    }
+
+    .nav-menu {
+        display: none;
+    }
+
+    .nav-toggle {
+        display: inline-flex;
+    }
+
+    .nav-cta {
+        min-width: 96px;
+        height: 42px;
+        padding: 0 16px;
+        font-size: 13px;
+    }
+
+    .mobile-menu {
+        inset: 70px 0 0;
+        max-height: calc(100vh - 70px);
+    }
+
+    .mobile-menu-inner {
+        max-width: min(100%, 640px);
+    }
+
+    .hero {
+        min-height: 100svh;
+        padding: 120px 20px 60px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.4rem, 12vw, 4rem);
+        line-height: 0.95;
+    }
+
+    .hero-copy {
+        font-size: 1rem;
+        max-width: 100%;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 14px;
+    }
+
+    .hero-actions .btn,
+    .hero-actions button {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .company-profile {
+        padding: 80px 20px;
+    }
+
+    .company-profile .section-header h2 {
+        font-size: clamp(2rem, 10vw, 3rem);
+    }
+
+    .company-profile-intro,
+    .profile-grid,
+    .profile-summary-grid,
+    .company-service-panels,
+    .company-snapshot-grid,
+    .about-grid,
+    .services-grid,
+    .features-grid,
+    .projects-grid,
+    .trust-grid,
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card,
+    .service-card,
+    .feature-card,
+    .project-card,
+    .trust-card,
+    .contact-card,
+    .contact-map,
+    .about-card,
+    .snapshot-card,
+    .service-panel,
+    .profile-summary-card {
+        width: 100%;
+    }
+
+    .about-mini-stats,
+    .profile-cards,
+    .contact-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .before-after {
+        aspect-ratio: 4 / 3;
+    }
+
+    .ba-divider,
+    .ba-handle {
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+    }
+
+    .ba-handle {
+        width: 56px;
+        height: 56px;
+    }
+
+    .loader-card {
+        width: min(92vw, 420px);
+    }
+
+    .loader-logo-wrap {
+        width: 88px;
+        height: 88px;
+    }
+
+    .loader-logo {
+        width: 58px;
+        height: 58px;
+    }
+}
+
+@media (max-width: 620px) {
+    .hero {
+        padding: 100px 18px 60px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.4rem, 12vw, 3rem);
+        line-height: 0.95;
+    }
+
+    .company-profile {
+        padding: 60px 16px;
+    }
+
+    .trust-media {
+        min-height: 320px;
+    }
+
+    .trust-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .mobile-call-now {
+        display: inline-flex;
+    }
+
+    .floating-cta {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .before-after {
+        aspect-ratio: 1 / 1;
+    }
+
+    .nav-container {
+        padding: 0 16px;
+    }
+
+    .nav-title {
+        max-width: 140px;
+    }
+
+    .hero {
+        padding: 100px 16px 48px;
+    }
+
+    .section-header {
+        margin-bottom: 30px;
+    }
+
+    .profile-copy p,
+    .service-card p,
+    .about-copy p,
+    .project-panel p,
+    .trust-card p,
+    .contact-card p {
+        font-size: 0.95rem;
     }
 }
 

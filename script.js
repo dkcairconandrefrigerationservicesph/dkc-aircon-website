@@ -281,6 +281,17 @@ function initVideo() {
 
 function initContactForm() {
     const contactForm = document.getElementById('contact-form');
+    const formMessage = document.querySelector('.contact-form-message');
+
+    const showMessage = (message, type = 'success') => {
+        if (!formMessage) return;
+        formMessage.innerHTML = message;
+        formMessage.classList.remove('success', 'error');
+        formMessage.classList.add(type);
+        formMessage.style.display = 'block';
+        formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
     if (contactForm) {
         contactForm.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -297,10 +308,10 @@ function initContactForm() {
             // Send email
             emailjs.sendForm('service_2seef04', 'template_v90dnbw', this)
                 .then(function() {
-                    alert('Message sent successfully!');
+                    showMessage('Thank you! Your booking request has been sent. If you do not receive confirmation by email, please also message us on <a href="https://www.facebook.com/profile.php?id=100063675776144" target="_blank" rel="noopener noreferrer">Facebook</a> or call us on <a href="viber://chat?number=09276863314">Viber</a>.');
                     contactForm.reset();
                 }, function(error) {
-                    alert('Failed to send message. Please try again.');
+                    showMessage('Unable to send booking request. Please try again or contact us directly via <a href="https://www.facebook.com/profile.php?id=100063675776144" target="_blank" rel="noopener noreferrer">Facebook</a> or <a href="viber://chat?number=09276863314">Viber</a>.', 'error');
                     console.error('EmailJS error:', error);
                 });
         });
