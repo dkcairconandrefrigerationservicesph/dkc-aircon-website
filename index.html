@@ -43,15 +43,26 @@
         </div>
     </div>
 
+    <!-- Subtle animated frost particles for cinematic cold effect -->
+    <div class="frost-particles">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
     <header class="navbar">
         <div class="nav-container">
             <a href="#home" class="nav-brand">
                 <img src="images/DKCLOGO.png" alt="DKC Logo" class="nav-logo">
                 <span class="nav-title">DKC Aircon & Refrigeration Services</span>
             </a>
-
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <nav class="nav-menu">
                 <a href="#home">Home</a>
+                <a href="#company-profile">Company Profile</a>
                 <a href="#story">Story</a>
                 <a href="#services">Services</a>
                 <a href="#about">About</a>
@@ -59,8 +70,20 @@
                 <a href="#projects">Projects</a>
                 <a href="#contact">Contact</a>
             </nav>
-
             <a href="#contact" class="nav-cta">Book Now</a>
+        </div>
+        <div class="mobile-menu" aria-hidden="true">
+            <div class="mobile-menu-inner">
+                <a href="#home">Home</a>
+                <a href="#company-profile">Company Profile</a>
+                <a href="#story">Story</a>
+                <a href="#services">Services</a>
+                <a href="#about">About</a>
+                <a href="#why-choose-us">Why Choose Us</a>
+                <a href="#projects">Projects</a>
+                <a href="#contact">Contact</a>
+                <a href="#contact" class="btn btn-primary mobile-menu-cta">Book Now</a>
+            </div>
         </div>
     </header>
 
@@ -76,20 +99,170 @@
                 <span></span><span></span><span></span><span></span><span></span>
             </div>
             <div class="hero-content">
-                <p class="eyebrow">PREMIUM AIRCON & REFRIGERATION SERVICES</p>
-                <div class="hero-title">
-                    <span>Reliable Cooling Solutions</span>
-                    <span>Built for Homes & Businesses</span>
-                </div>
-                <p class="hero-copy">Fast response, clean workmanship, and trusted technicians in Muntinlupa City. From cleaning and maintenance to repair, installation, and refrigeration.</p>
+                <p class="eyebrow">DKC AIRCON & REFRIGERATION SERVICES</p>
+                <h1 class="hero-title">Stay cool with reliable and professional air conditioning services.</h1>
+                <p class="hero-copy">We provide high-quality installation, maintenance, and repair for residential and commercial spaces—delivered by experienced technicians you can trust.</p>
+                <ul class="hero-features">
+                    <li>✔ Fast Response</li>
+                    <li>✔ Reliable Service</li>
+                    <li>✔ Affordable Pricing</li>
+                </ul>
                 <div class="hero-actions">
-                    <a href="#contact" class="btn btn-primary">Call Now</a>
-                    <a href="#compare" class="btn btn-secondary">Compare Service</a>
+                    <a href="#contact" class="btn btn-primary">Book Now</a>
+                    <a href="#contact" class="btn btn-secondary">Get Free Quote</a>
                 </div>
             </div>
             <div class="scroll-indicator">
                 <div class="mouse-wheel"></div>
                 <span>Scroll to discover</span>
+            </div>
+        </section>
+
+        <section id="company-profile" class="company-profile">
+            <div class="container">
+                <div class="section-header">
+                    <p class="eyebrow">Company Profile</p>
+                    <h2>DKC Aircon & Refrigeration Services</h2>
+                    <p class="section-subtitle">We Provide Good Service</p>
+                    <p>Professional Air Conditioning Solutions<br>Supply • Installation • Maintenance • Repair</p>
+                </div>
+                <div class="company-profile-intro reveal">
+                    <div class="profile-intro-top">
+                        <div class="profile-hero">
+                            <img src="images/DKCLOGO.png" alt="DKC Logo" class="profile-logo">
+                            <div>
+                                <p class="eyebrow">Professional Air Conditioning Solutions</p>
+                                <h3>Stay cool with reliable and professional air conditioning services.</h3>
+                            </div>
+                        </div>
+                        <p class="profile-intro-copy">We provide high-quality installation, maintenance, and repair for residential and commercial spaces—delivered by experienced technicians you can trust.</p>
+                        <div class="profile-highlights">
+                            <span>Fast Response</span>
+                            <span>Reliable Service</span>
+                            <span>Affordable Pricing</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="company-snapshot-grid reveal">
+                    <article class="snapshot-card"><span>Residential</span></article>
+                    <article class="snapshot-card"><span>Commercial</span></article>
+                    <article class="snapshot-card"><span>Maintenance</span></article>
+                    <article class="snapshot-card"><span>Installation</span></article>
+                </div>
+                <div class="profile-grid">
+                    <div class="profile-copy reveal">
+                        <p>DKC Aircon & Refrigeration Services is a trusted air conditioning solutions provider based in Muntinlupa City, Philippines.</p>
+                        <p>We specialize in the supply, installation, maintenance, and repair of air conditioning systems for residential, commercial, and industrial clients.</p>
+                        <p>From a small local operation, DKC has grown into a reliable service provider known for quality workmanship, fast service, and customer satisfaction.</p>
+                        <p>We combine hands-on technical expertise with modern tools such as online booking systems, social media communication, and fast customer response.</p>
+                    </div>
+                    <div class="profile-cards">
+                        <article class="profile-card reveal">
+                            <h3>Vision</h3>
+                            <p>To become one of the most trusted and reliable air conditioning service providers in the Philippines, known for excellence, innovation, and customer satisfaction.</p>
+                        </article>
+                        <article class="profile-card reveal">
+                            <h3>Mission</h3>
+                            <ul>
+                                <li>Deliver high-quality air conditioning and refrigeration services</li>
+                                <li>Provide fast and reliable customer support</li>
+                                <li>Build long-term relationships with clients</li>
+                                <li>Continuously improve through innovation and modern technology</li>
+                                <li>Promote energy-efficient and cost-effective solutions</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+                <div class="company-service-panels reveal">
+                    <article class="service-panel">
+                        <img src="images/maintenanceicon.png" alt="Maintenance Icon" class="service-icon">
+                        <h3>Maintenance & Cleaning</h3>
+                        <ul>
+                            <li>Preventive Maintenance</li>
+                            <li>Aircon Cleaning</li>
+                            <li>Chemical Cleaning</li>
+                        </ul>
+                    </article>
+                    <article class="service-panel">
+                        <img src="images/airconinstallation.png" alt="Installation Icon" class="service-icon">
+                        <h3>Installation & Technical Works</h3>
+                        <ul>
+                            <li>Installation</li>
+                            <li>Dismantling</li>
+                            <li>Relocation</li>
+                            <li>Piping & Wiring</li>
+                        </ul>
+                    </article>
+                    <article class="service-panel">
+                        <img src="images/airconrepaireicon.png" alt="Repair Icon" class="service-icon">
+                        <h3>Repair & Diagnostics</h3>
+                        <ul>
+                            <li>Repair & Troubleshooting</li>
+                            <li>System Check-Up</li>
+                            <li>Diagnosis and Testing</li>
+                            <li>Freon Charging</li>
+                        </ul>
+                    </article>
+                    <article class="service-panel">
+                        <img src="images/refregirationservicesicon.png" alt="Supply Icon" class="service-icon">
+                        <h3>Supply & Sales</h3>
+                        <ul>
+                            <li>Aircon Unit Supply</li>
+                            <li>Authorized AUX Dealer</li>
+                            <li>Brands: Daikin, Carrier, Midea, Koppel</li>
+                        </ul>
+                    </article>
+                    <article class="service-panel service-panel-full">
+                        <img src="images/airconcleaningicon.png" alt="Advanced Services Icon" class="service-icon">
+                        <h3>Advanced Services</h3>
+                        <ul>
+                            <li>Air Quality Check</li>
+                            <li>Consultation and Site Survey</li>
+                        </ul>
+                    </article>
+                </div>
+                <div class="profile-summary-grid">
+                    <article class="profile-summary-card reveal">
+                        <h3>Why Choose DKC</h3>
+                        <ul>
+                            <li>Skilled and Experienced Technicians</li>
+                            <li>Fast Response Time</li>
+                            <li>Reliable and Quality Service</li>
+                            <li>Competitive Pricing</li>
+                            <li>Multi-Brand Support</li>
+                            <li>Trusted by Residential and Commercial Clients</li>
+                            <li>Modern Communication & Booking System</li>
+                        </ul>
+                    </article>
+                    <article class="profile-summary-card reveal">
+                        <h3>Project Highlights</h3>
+                        <ul>
+                            <li>Bicol Isarog Transport – Preventive Maintenance</li>
+                            <li>BPI Philam Life Alabang – Maintenance Service</li>
+                            <li>Entrata Filinvest Alabang – Completed Project</li>
+                        </ul>
+                    </article>
+                    <article class="profile-summary-card reveal">
+                        <h3>Service Area</h3>
+                        <p>Muntinlupa City<br>Metro Manila<br>Nearby Areas</p>
+                    </article>
+                    <article class="profile-summary-card reveal">
+                        <h3>Modern Service Experience</h3>
+                        <ul>
+                            <li>Online booking system</li>
+                            <li>Messenger-based communication</li>
+                            <li>Fast inquiry response</li>
+                            <li>Active social media presence</li>
+                        </ul>
+                    </article>
+                    <article class="profile-summary-card reveal">
+                        <h3>Contact</h3>
+                        <p>Unit B Malbarr Building, National Road, Putatan, Muntinlupa City</p>
+                        <p>0927-686-3314</p>
+                        <p>(02) 8716-7334</p>
+                        <p>dkcservices0912@gmail.com</p>
+                    </article>
+                </div>
             </div>
         </section>
 
@@ -134,37 +307,37 @@
                 </div>
                 <div class="services-grid">
                     <article class="service-card reveal">
-                        <div class="service-icon service-cleaning"></div>
+                        <img src="images/airconcleaningicon.png" alt="Aircon Cleaning Icon" class="service-card-icon">
                         <h3>Aircon Cleaning</h3>
                         <p>Full system cleaning to restore performance and freshen indoor air quality.</p>
                     </article>
                     <article class="service-card reveal">
-                        <div class="service-icon service-maintenance"></div>
+                        <img src="images/maintenanceicon.png" alt="Maintenance Icon" class="service-card-icon">
                         <h3>Preventive Maintenance</h3>
                         <p>Regular checkups that stop failures before they happen.</p>
                     </article>
                     <article class="service-card reveal">
-                        <div class="service-icon service-repair"></div>
+                        <img src="images/airconrepaireicon.png" alt="Repair Icon" class="service-card-icon">
                         <h3>Aircon Repair</h3>
                         <p>Fast diagnosis and repair for damaged or malfunctioning systems.</p>
                     </article>
                     <article class="service-card reveal">
-                        <div class="service-icon service-installation"></div>
+                        <img src="images/airconinstallation.png" alt="Installation Icon" class="service-card-icon">
                         <h3>Aircon Installation</h3>
                         <p>Professional installation with clean placement and careful commissioning.</p>
                     </article>
                     <article class="service-card reveal">
-                        <div class="service-icon service-repiping"></div>
+                        <img src="images/repiping&reinstallationicon.png" alt="Re-piping Icon" class="service-card-icon">
                         <h3>Re-piping & Re-insulation</h3>
                         <p>Upgrade piping and insulation to improve performance and reduce leaks.</p>
                     </article>
                     <article class="service-card reveal">
-                        <div class="service-icon service-refrigeration"></div>
+                        <img src="images/refregirationservicesicon.png" alt="Refrigeration Icon" class="service-card-icon">
                         <h3>Refrigeration Services</h3>
                         <p>Commercial and residential refrigeration care for cold rooms and cabinets.</p>
                     </article>
                     <article class="service-card reveal">
-                        <div class="service-icon service-freon"></div>
+                        <img src="images/freonchargingicon.png" alt="Freon Charging Icon" class="service-card-icon">
                         <h3>Freon Charging</h3>
                         <p>Accurate refrigerant charging for optimal cooling and safe operation.</p>
                     </article>
@@ -199,7 +372,10 @@
                     <div class="about-copy reveal">
                         <p class="eyebrow">Who we are</p>
                         <h2>Local expertise for dependable cooling</h2>
-                        <p>DKC Aircon & Refrigeration Services is based in Muntinlupa City and delivers premium aircon and refrigeration service across homes and businesses. We specialize in making your systems cleaner, colder, and more reliable.</p>
+                        <p>DKC Aircon & Refrigeration Services is a trusted air conditioning solutions provider based in Muntinlupa City, Philippines.</p>
+                        <p>We specialize in the supply, installation, maintenance, and repair of air conditioning systems for residential, commercial, and industrial clients.</p>
+                        <p>From a small local operation, DKC has grown into a reliable service provider known for quality workmanship, fast service, and customer satisfaction.</p>
+                        <p>We combine hands-on technical expertise with modern tools such as online booking systems, social media communication, and fast customer response.</p>
                         <div class="about-list">
                             <div><strong>+ Trusted technicians</strong><span>Experienced and courteous service</span></div>
                             <div><strong>+ Transparent pricing</strong><span>Clear estimates before work begins</span></div>
@@ -208,12 +384,27 @@
                     </div>
                     <div class="about-card glassmorphism reveal">
                         <div class="about-card-inner">
-                            <img src="images/DKCLOGO.png" alt="DKC Logo" class="about-logo">
-                            <div class="about-overlay"></div>
-                            <div class="about-copy-panel">
-                                <p>Clean service, strong performance.</p>
+                            <div class="about-brand-card">
+                                <img src="images/DKCLOGO.png" alt="DKC Logo" class="about-brand-logo">
+                                <p class="about-card-label">Trusted Cooling Partner</p>
                                 <h3>Quality first, every time.</h3>
+                                <div class="about-mini-stats">
+                                    <article>
+                                        <strong>Residential</strong>
+                                        <span>Home cooling service</span>
+                                    </article>
+                                    <article>
+                                        <strong>Commercial</strong>
+                                        <span>Business support</span>
+                                    </article>
+                                    <article>
+                                        <strong>Maintenance</strong>
+                                        <span>Preventive care</span>
+                                    </article>
+                                </div>
+                                <p class="about-card-tagline">We Provide Good Service</p>
                             </div>
+                            <div class="about-overlay"></div>
                         </div>
                     </div>
                 </div>

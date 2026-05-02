@@ -59,6 +59,7 @@ window.addEventListener('load', () => {
     observeStorySteps();
     updateActiveLink();
     setupCompareSlider();
+    setupMobileMenu();
     initSounds();
     initVideo();
     initContactForm();
@@ -200,12 +201,12 @@ function observeStorySteps() {
 
 function updateActiveLink() {
     const sections = document.querySelectorAll('main section[id]');
-    const links = document.querySelectorAll('.nav-menu a');
+    const links = document.querySelectorAll('.nav-menu a, .mobile-menu a');
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             const id = entry.target.id;
-            const link = document.querySelector(`.nav-menu a[href="#${id}"]`);
+            const link = document.querySelector(`.nav-menu a[href="#${id}"], .mobile-menu a[href="#${id}"]`);
             if (link) {
                 if (entry.isIntersecting) {
                     links.forEach(item => item.classList.remove('active'));
@@ -216,6 +217,36 @@ function updateActiveLink() {
     }, { threshold: 0.4 });
 
     sections.forEach(section => observer.observe(section));
+}
+
+function setupMobileMenu() {
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const mobileLinks = document.querySelectorAll('.mobile-menu a[href^="#"]');
+
+    if (!navToggle || !mobileMenu) return;
+
+    navToggle.addEventListener('click', () => {
+        const isOpen = mobileMenu.classList.toggle('is-open');
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+        mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+    });
+
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.remove('is-open');
+            navToggle.setAttribute('aria-expanded', 'false');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+        });
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1100 && mobileMenu.classList.contains('is-open')) {
+            mobileMenu.classList.remove('is-open');
+            navToggle.setAttribute('aria-expanded', 'false');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+        }
+    });
 }
 
 window.addEventListener('scroll', () => {
