@@ -481,12 +481,40 @@ textarea {
     box-shadow: 0 0 0 1px rgba(79,212,255,0.35), 0 18px 30px rgba(0,0,0,0.18);
 }
 
-.nav-toggle-icon {
+.nav-toggle-line {
     display: block;
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    filter: invert(1) brightness(2);
+    width: 22px;
+    height: 2px;
+    border-radius: 999px;
+    background: #eef4ff;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.nav-toggle-line:nth-child(1) {
+    top: 15px;
+}
+
+.nav-toggle-line:nth-child(2) {
+    top: 23px;
+}
+
+.nav-toggle-line:nth-child(3) {
+    top: 31px;
+}
+
+.nav-toggle.is-open .nav-toggle-line:nth-child(1) {
+    transform: translateX(-50%) translateY(8px) rotate(45deg);
+}
+
+.nav-toggle.is-open .nav-toggle-line:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle.is-open .nav-toggle-line:nth-child(3) {
+    transform: translateX(-50%) translateY(-8px) rotate(-45deg);
 }
 
 .mobile-menu {
@@ -570,17 +598,6 @@ body {
     height: 42px;
     object-fit: contain;
     flex-shrink: 0;
-}
-
-.nav-device-icon {
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    object-fit: contain;
-}
-
-.nav-device-icon--mobile {
-    display: none;
 }
 
 .nav-title {
@@ -2377,20 +2394,12 @@ section {
     }
 
     .nav-title::after {
-        content: "DKC Refrigiration & Airconditioning";
+        content: "DKC Airconditioning and Refrigeration Services";
         visibility: visible;
         position: absolute;
         left: 0;
         top: 0;
         white-space: nowrap;
-    }
-
-    .nav-device-icon--desktop {
-        display: none;
-    }
-
-    .nav-device-icon--mobile {
-        display: inline-flex;
     }
 
     .nav-cta {
@@ -2559,7 +2568,7 @@ section {
     }
 
     .nav-title::after {
-        content: "DKC Refrigiration & Airconditioning";
+        content: "DKC Airconditioning and Refrigeration Services";
         visibility: visible;
         position: absolute;
         left: 0;
@@ -2852,4 +2861,3 @@ section {
         display: inline-flex;
     }
 }
-

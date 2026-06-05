@@ -228,6 +228,7 @@ function setupMobileMenu() {
 
     navToggle.addEventListener('click', () => {
         const isOpen = mobileMenu.classList.toggle('is-open');
+        navToggle.classList.toggle('is-open', isOpen);
         navToggle.setAttribute('aria-expanded', String(isOpen));
         mobileMenu.setAttribute('aria-hidden', String(!isOpen));
     });
@@ -235,6 +236,7 @@ function setupMobileMenu() {
     mobileLinks.forEach(link => {
         link.addEventListener('click', () => {
             mobileMenu.classList.remove('is-open');
+            navToggle.classList.remove('is-open');
             navToggle.setAttribute('aria-expanded', 'false');
             mobileMenu.setAttribute('aria-hidden', 'true');
         });
@@ -243,6 +245,7 @@ function setupMobileMenu() {
     window.addEventListener('resize', () => {
         if (window.innerWidth > 1100 && mobileMenu.classList.contains('is-open')) {
             mobileMenu.classList.remove('is-open');
+            navToggle.classList.remove('is-open');
             navToggle.setAttribute('aria-expanded', 'false');
             mobileMenu.setAttribute('aria-hidden', 'true');
         }
