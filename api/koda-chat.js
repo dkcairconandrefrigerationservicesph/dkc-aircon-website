@@ -165,10 +165,15 @@ function normalizePricingText(message) {
 }
 
 function isCleaningPriceQuestion(text) {
-    return (
-        (text.includes('magkano') || text.includes('price') || text.includes('presyo') || text.includes('rate')) &&
-        (text.includes('cleaning') || text.includes('linis') || text.includes('pms') || text.includes('aircon'))
-    );
+    return text.includes('magkano cleaning') ||
+        text.includes('presyo cleaning') ||
+        text.includes('cleaning price') ||
+        text.includes('cleaning') ||
+        text.includes('linis') ||
+        text.includes('pms') ||
+        text.includes('split type') ||
+        text.includes('window type') ||
+        text.includes('hp');
 }
 
 function hasRepairIntent(text) {
@@ -205,9 +210,22 @@ function getLocalPricingReply(message) {
     const mentionsWindow = text.includes('window');
     const mentionsSplit = text.includes('split');
     const mentionsKnownTypeAndHp = (mentionsWindow || mentionsSplit) && hasHp(text, ['1', '1.5', '2', '2.5']);
+    const pricingRelated = isCleaningPriceQuestion(text);
 
-    if (!isCleaningPriceQuestion(text) && (!mentionsKnownTypeAndHp || hasRepairIntent(text))) {
+    if ((!pricingRelated && !mentionsKnownTypeAndHp) || hasRepairIntent(text)) {
         return null;
+    }
+
+    if (mentionsSplit && text.includes('1.5')) {
+        return 'For Split Type 1HP–1.5HP, standard cleaning is ₱1,300.';
+    }
+
+    if (mentionsSplit && text.includes('2.5')) {
+        return 'For Split Type 2HP–2.5HP, standard cleaning is ₱1,800.';
+    }
+
+    if (mentionsWindow && text.includes('1.5')) {
+        return 'For Window Type 1.5HP–2HP, standard cleaning is ₱800.';
     }
 
     if (mentionsWindow && hasHp(text, ['1']) && !hasHp(text, ['1.5', '2'])) {
@@ -321,6 +339,8 @@ module.exports = async function handler(req, res) {
 
         const localPricingReply = getLocalPricingReply(message);
         if (localPricingReply) {
+            console.log('LOCAL_PRICING_MATCH');
+            console.log('ROUTE: LOCAL_PRICING');
             kodaSessions.set(sessionId, [
                 ...conversation,
                 { role: 'assistant', content: localPricingReply }
@@ -328,6 +348,8 @@ module.exports = async function handler(req, res) {
             res.status(200).json({ reply: localPricingReply });
             return;
         }
+
+        console.log('ROUTE: GEMINI');
 
         if (!process.env.GEMINI_API_KEY) {
             res.status(500).json({
