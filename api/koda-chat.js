@@ -43,9 +43,9 @@ function loadLocalEnvFiles() {
 
 loadLocalEnvFiles();
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 console.log('GEMINI_API_KEY loaded:', !!process.env.GEMINI_API_KEY);
-console.log('GEMINI_MODEL:', process.env.GEMINI_MODEL);
+console.log('GEMINI_MODEL:', MODEL);
 
 const kodaSessions = new Map();
 const geminiRetryDelays = [1000, 2000, 4000];
@@ -245,7 +245,7 @@ module.exports = async function handler(req, res) {
         let response;
         try {
             response = await generateGeminiContentWithRetry(ai, {
-                model: GEMINI_MODEL,
+                model: MODEL,
                 contents: conversation.map(toGeminiContent),
                 config: {
                     systemInstruction: kodaSystemPrompt,
