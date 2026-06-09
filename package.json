@@ -1,0 +1,14 @@
+{
+  "name": "dkc-aircon-website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check script.js && node --check api/koda-chat.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.52.0"
+  },
+  "devDependencies": {
+    "vercel": "^54.9.1"
+  }
+}

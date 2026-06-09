@@ -64,6 +64,7 @@ window.addEventListener('load', () => {
     initVideo();
     initContactForm();
     initTrustShuffle();
+    initDkcAssistant();
 });
 
 function initSounds() {
@@ -285,6 +286,10 @@ function initVideo() {
 function initContactForm() {
     const contactForm = document.getElementById('contact-form');
     const formMessage = document.querySelector('.contact-form-message');
+    const submitButton = contactForm?.querySelector('button[type="submit"]');
+    const bookingEmail = 'dkcservices0912@gmail.com';
+    const facebookUrl = 'https://www.facebook.com/profile.php?id=100063675776144';
+    const viberUrl = 'viber://chat?number=09276863314';
 
     const showMessage = (message, type = 'success') => {
         if (!formMessage) return;
@@ -293,6 +298,41 @@ function initContactForm() {
         formMessage.classList.add(type);
         formMessage.style.display = 'block';
         formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    const getFormValue = (name) => {
+        const field = contactForm?.querySelector(`[name="${name}"]`);
+        return field ? field.value.trim() : '';
+    };
+
+    const createMailtoLink = () => {
+        const subject = encodeURIComponent('New Booking Request - DKC');
+        const serviceField = contactForm?.querySelector('[name="service"]');
+        const service = serviceField?.selectedOptions?.[0]?.textContent?.trim() || getFormValue('service') || 'Not specified';
+        const body = encodeURIComponent([
+            'Hello DKC, I would like to request a service.',
+            '',
+            `Name: ${getFormValue('from_name')}`,
+            `Email: ${getFormValue('email')}`,
+            `Phone: ${getFormValue('phone')}`,
+            `Service: ${service}`,
+            `Message: ${getFormValue('message') || 'No message provided'}`
+        ].join('\n'));
+
+        return `mailto:${bookingEmail}?subject=${subject}&body=${body}`;
+    };
+
+    const setSubmitState = (isSending) => {
+        if (!submitButton) return;
+        submitButton.disabled = isSending;
+        submitButton.textContent = isSending ? 'Sending...' : 'Request Service';
+    };
+
+    const showFallbackMessage = () => {
+        showMessage(
+            `We could not send the booking form right now. Please send your request directly via <a href="${createMailtoLink()}">email</a>, <a href="${facebookUrl}" target="_blank" rel="noopener noreferrer">Facebook</a>, or <a href="${viberUrl}">Viber</a>.`,
+            'error'
+        );
     };
 
     if (contactForm) {
@@ -304,6 +344,13 @@ function initContactForm() {
             if (nameField && duplicateName) {
                 duplicateName.value = nameField.value;
             }
+
+            if (!window.emailjs) {
+                showFallbackMessage();
+                return;
+            }
+
+            setSubmitState(true);
             
             // Initialize EmailJS with your public key
             emailjs.init('CW1_M1d7Y_UVzjm7G');
@@ -314,8 +361,11 @@ function initContactForm() {
                     showMessage('Thank you! Your booking request has been sent. If you do not receive confirmation by email, please also message us on <a href="https://www.facebook.com/profile.php?id=100063675776144" target="_blank" rel="noopener noreferrer">Facebook</a> or call us on <a href="viber://chat?number=09276863314">Viber</a>.');
                     contactForm.reset();
                 }, function(error) {
-                    showMessage('Unable to send booking request. Please try again or contact us directly via <a href="https://www.facebook.com/profile.php?id=100063675776144" target="_blank" rel="noopener noreferrer">Facebook</a> or <a href="viber://chat?number=09276863314">Viber</a>.', 'error');
+                    showFallbackMessage();
                     console.error('EmailJS error:', error);
+                })
+                .finally(function() {
+                    setSubmitState(false);
                 });
         });
     }
@@ -406,4 +456,246 @@ function initTrustShuffle() {
     setInterval(() => {
         rotateTrustSection();
     }, 10000);
+}
+
+function initDkcAssistant() {
+    const assistant = document.querySelector('.ai-assistant');
+    const toggle = document.querySelector('.ai-assistant-toggle');
+    const close = document.querySelector('.ai-assistant-close');
+    const messages = document.querySelector('.ai-messages');
+    const form = document.querySelector('.ai-form');
+    const input = document.getElementById('ai-question');
+    const quickPrompts = document.querySelectorAll('[data-ai-prompt]');
+    const storageKey = 'dkc-koda-chat-history-v5';
+    const sessionKey = 'dkc-koda-session-id';
+    const openingMessage = "Hi! I'm KODA, DKC's HVAC Knowledge & Operations Digital Assistant. You can ask me about aircon cleaning prices, common aircon problems, maintenance tips, installation, repair, freon charging, commercial HVAC, refrigeration, and DKC services.";
+    const staticHostingMessage = 'KODA AI is available only on the live DKC website with its backend API. For now, please contact DKC at 0927-686-3314.';
+    const apiErrorMessage = 'Sorry, KODA could not reach the AI service right now. Please try again in a moment, or contact DKC at 0927-686-3314.';
+    let conversationHistory = loadKodaHistory(storageKey);
+    let introShown = conversationHistory.length > 0;
+    let isWaitingForReply = false;
+    const sessionId = getKodaSessionId(sessionKey);
+
+    if (!assistant || !toggle || !messages || !form || !input) return;
+
+    const setOpen = (isOpen) => {
+        assistant.classList.toggle('is-open', isOpen);
+        toggle.setAttribute('aria-expanded', String(isOpen));
+        const panel = assistant.querySelector('.ai-assistant-panel');
+        if (panel) panel.setAttribute('aria-hidden', String(!isOpen));
+        if (isOpen) {
+            showOpeningMessage();
+            setTimeout(() => {
+                input.focus();
+                resizeKodaInput(input);
+                scrollKodaToBottom(messages);
+            }, 120);
+        }
+    };
+
+    const saveHistory = () => {
+        const trimmedHistory = conversationHistory.slice(-20);
+        conversationHistory = trimmedHistory;
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(trimmedHistory));
+        } catch (error) {
+            console.warn('Unable to save KODA chat history:', error);
+        }
+    };
+
+    const renderMessage = (text, role, shouldStore = true) => {
+        const sender = role === 'user' ? 'user' : 'bot';
+        const message = document.createElement('div');
+        message.className = `ai-message ${sender}`;
+        if (role === 'assistant') {
+            const avatar = document.createElement('img');
+            avatar.className = 'ai-message-avatar';
+            avatar.src = 'images/KODAICON.png';
+            avatar.alt = 'KODA';
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-message-bubble';
+            bubble.textContent = text;
+            message.append(avatar, bubble);
+        } else {
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-message-bubble';
+            bubble.textContent = text;
+            message.appendChild(bubble);
+        }
+        messages.appendChild(message);
+        scrollKodaToBottom(messages);
+        if (shouldStore) {
+            conversationHistory.push({
+                role,
+                content: text
+            });
+            saveHistory();
+        }
+        return message;
+    };
+
+    const showOpeningMessage = () => {
+        if (introShown || conversationHistory.length) return;
+        introShown = true;
+        renderMessage(openingMessage, 'assistant');
+    };
+
+    const setWaitingState = (isWaiting) => {
+        isWaitingForReply = isWaiting;
+        input.disabled = isWaiting;
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = isWaiting;
+    };
+
+    const askAssistant = async (question) => {
+        const userMessage = question.trim();
+        if (!userMessage || isWaitingForReply) return;
+        showOpeningMessage();
+        renderMessage(userMessage, 'user');
+        assistant.classList.add('has-user-message');
+
+        if (isStaticOnlyKodaHost()) {
+            renderMessage(staticHostingMessage, 'assistant', false);
+            return;
+        }
+
+        setWaitingState(true);
+        const typingMessage = addTypingMessage(messages);
+
+        try {
+            const chatHistory = conversationHistory.slice(0, -1).slice(-16);
+            const kodaSessionId = sessionId;
+            const payload = {
+                message: userMessage,
+                history: chatHistory,
+                sessionId: kodaSessionId
+            };
+            console.log("Calling KODA API:", "/api/koda-chat", payload);
+            const response = await fetch('/api/koda-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                    history: chatHistory,
+                    sessionId: kodaSessionId
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'KODA API request failed');
+            }
+
+            const answer = typeof data.reply === 'string' ? data.reply.trim() : '';
+            if (!answer) throw new Error('KODA API returned an empty response.');
+            typingMessage.remove();
+            renderMessage(answer, 'assistant');
+        } catch (error) {
+            console.error("KODA API failed:", error);
+            typingMessage.remove();
+            renderMessage(apiErrorMessage, 'assistant', false);
+        } finally {
+            setWaitingState(false);
+            input.focus();
+            resizeKodaInput(input);
+        }
+    };
+
+    conversationHistory.forEach(item => {
+        if (!item || !item.content) return;
+        renderMessage(item.content, item.role === 'user' ? 'user' : 'assistant', false);
+    });
+    if (conversationHistory.some(item => item.role === 'user')) {
+        assistant.classList.add('has-user-message');
+    }
+
+    toggle.addEventListener('click', () => {
+        const isOpen = !assistant.classList.contains('is-open');
+        setOpen(isOpen);
+    });
+
+    close?.addEventListener('click', () => setOpen(false));
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const question = input.value;
+        input.value = '';
+        resizeKodaInput(input);
+        askAssistant(question);
+    });
+
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            form.requestSubmit();
+        }
+    });
+
+    input.addEventListener('input', () => resizeKodaInput(input));
+
+    quickPrompts.forEach(button => {
+        button.addEventListener('click', () => {
+            setOpen(true);
+            askAssistant(button.dataset.aiPrompt || button.textContent || '');
+        });
+    });
+
+    resizeKodaInput(input);
+}
+
+function addTypingMessage(messages) {
+    const message = document.createElement('div');
+    message.className = 'ai-message bot ai-typing';
+    message.setAttribute('aria-label', 'KODA is typing');
+    message.innerHTML = '<img class="ai-message-avatar" src="images/KODAICON.png" alt="KODA"><div class="ai-message-bubble"><strong>KODA is typing...</strong><span></span><span></span><span></span></div>';
+    messages.appendChild(message);
+    scrollKodaToBottom(messages);
+    return message;
+}
+
+function scrollKodaToBottom(messages) {
+    requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+    });
+}
+
+function resizeKodaInput(input) {
+    input.style.height = 'auto';
+    const nextHeight = Math.min(input.scrollHeight, 120);
+    input.style.height = `${nextHeight}px`;
+    input.style.overflowY = input.scrollHeight > 120 ? 'auto' : 'hidden';
+}
+
+function isStaticOnlyKodaHost() {
+    const hostname = window.location.hostname;
+    return window.location.protocol === 'file:' || hostname.includes('github.io');
+}
+
+function getKodaSessionId(sessionKey) {
+    try {
+        let sessionId = sessionStorage.getItem(sessionKey);
+        if (!sessionId) {
+            sessionId = `koda-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+            sessionStorage.setItem(sessionKey, sessionId);
+        }
+        return sessionId;
+    } catch (error) {
+        return `koda-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+}
+
+function loadKodaHistory(storageKey) {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .filter(item => item && ['user', 'assistant'].includes(item.role) && typeof item.content === 'string')
+            .slice(-20);
+    } catch (error) {
+        console.warn('Unable to load KODA chat history:', error);
+        return [];
+    }
 }
