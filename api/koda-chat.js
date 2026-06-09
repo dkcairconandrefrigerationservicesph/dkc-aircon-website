@@ -53,6 +53,7 @@ console.log('GEMINI_MODEL:', GEMINI_MODELS[0]);
 console.log('GEMINI_MODEL_FALLBACKS:', GEMINI_MODELS.join(', '));
 
 const kodaSessions = new Map();
+const kodaLeadSessions = new Map();
 const geminiRetryDelays = [1000, 2000];
 const aiTrafficMessage = 'Medyo busy lang si KODA ngayon. For urgent concerns, please call DKC at 0927-686-3314.';
 
@@ -164,7 +165,11 @@ function normalizePricingText(message) {
         .trim();
 }
 
-function isCleaningPriceQuestion(text) {
+function includesAny(text, keywords) {
+    return keywords.some(keyword => text.includes(keyword));
+}
+
+function isPricingQuestion(text) {
     return text.includes('magkano') ||
         text.includes('price') ||
         text.includes('presyo') ||
@@ -191,7 +196,7 @@ function getLocalPricingReply(message) {
     const mentionsWindow = text.includes('window');
     const mentionsSplit = text.includes('split');
     const mentionsKnownTypeAndHp = (mentionsWindow || mentionsSplit) && hasHp(text, ['1', '1.5', '2', '2.5']);
-    const pricingRelated = isCleaningPriceQuestion(text);
+    const pricingRelated = isPricingQuestion(text);
 
     if (!pricingRelated && !mentionsKnownTypeAndHp) {
         return null;
@@ -228,39 +233,357 @@ function getLocalPricingReply(message) {
     return 'May I know your aircon type and HP capacity? Window type or split type?';
 }
 
-function getLocalReply(message) {
+function getSoftSellLine(text) {
+    const lines = [
+        'Need assistance? DKC is ready to help.',
+        'Want a technician to inspect the unit? We can schedule a visit.',
+        'Preventive maintenance helps avoid costly repairs.',
+        'Regular cleaning improves cooling performance and lowers power consumption.',
+        'DKC also offers installation, repair, and refrigeration services.'
+    ];
+    const index = Math.abs(text.length) % lines.length;
+    return lines[index];
+}
+
+function withSoftSell(reply, text) {
+    return `${reply}\n\n${getSoftSellLine(text)}`;
+}
+
+function leadCaptureReply() {
+    return [
+        'Sure, I can help collect the details for DKC.',
+        '',
+        'Name:',
+        'Contact Number:',
+        'Location:',
+        'Aircon Type:',
+        'HP Capacity:',
+        'Concern:'
+    ].join('\n');
+}
+
+function extractLeadData(message) {
+    const fields = {};
+    const patterns = {
+        name: /name\s*:\s*([^\n]+)/i,
+        contactNumber: /(contact number|contact|mobile|phone)\s*:\s*([^\n]+)/i,
+        location: /location\s*:\s*([^\n]+)/i,
+        airconType: /(aircon type|type)\s*:\s*([^\n]+)/i,
+        hpCapacity: /(hp capacity|hp)\s*:\s*([^\n]+)/i,
+        concern: /concern\s*:\s*([^\n]+)/i
+    };
+
+    Object.entries(patterns).forEach(([field, pattern]) => {
+        const match = message.match(pattern);
+        if (!match) return;
+        fields[field] = match[match.length - 1].trim();
+    });
+
+    return fields;
+}
+
+function getLocalRoute(message, history, sessionId) {
     const text = normalizePricingText(message);
     const compactText = text.replace(/[!?.,]/g, '');
+    const exchangeCount = Array.isArray(history)
+        ? history.filter(item => item && item.role === 'user').length
+        : 0;
+
+    if (includesAny(text, ['amoy sunog', 'may usok', 'nag spark', 'electrical smell'])) {
+        return {
+            route: 'ROUTE: LOCAL_EMERGENCY',
+            reply: 'Safety Reminder:\nTurn off the unit immediately and disconnect power if possible.\n\nPlease contact DKC immediately:\n0927-686-3314'
+        };
+    }
+
+    if (includesAny(text, ['book', 'book now', 'booking', 'schedule', 'appointment'])) {
+        return {
+            route: 'ROUTE: LOCAL_BOOKING',
+            reply: leadCaptureReply()
+        };
+    }
+
+    if (includesAny(text, ['magpapakabit', 'need cleaning', 'need repair', 'quotation', 'quote'])) {
+        kodaLeadSessions.set(sessionId, {
+            ...(kodaLeadSessions.get(sessionId) || {}),
+            intent: text,
+            updatedAt: new Date().toISOString()
+        });
+        return {
+            route: 'ROUTE: LOCAL_LEAD_CAPTURE',
+            reply: leadCaptureReply()
+        };
+    }
+
+    const leadData = extractLeadData(message);
+    if (Object.keys(leadData).length) {
+        kodaLeadSessions.set(sessionId, {
+            ...(kodaLeadSessions.get(sessionId) || {}),
+            ...leadData,
+            updatedAt: new Date().toISOString()
+        });
+        return {
+            route: 'ROUTE: LOCAL_LEAD_CAPTURE',
+            reply: 'Got it. I saved those details for this chat. DKC can use them to help with your inquiry or schedule.'
+        };
+    }
+
+    if (includesAny(text, ['how often cleaning', 'how often pms', 'how often maintenance', 'gaano kadalas cleaning', 'gaano kadalas pms'])) {
+        return {
+            route: 'ROUTE: LOCAL_FAQ',
+            reply: 'Residential: every 3-6 months.\nCommercial: every 1-3 months.\nRegular PMS helps keep cooling strong and can reduce costly repairs.'
+        };
+    }
+
+    if (includesAny(text, ['anong hp', 'what hp', 'room size'])) {
+        return {
+            route: 'ROUTE: LOCAL_FAQ',
+            reply: [
+                'Simple room-size guide:',
+                '',
+                'Up to 12 sqm: 0.75HP - 1HP',
+                '12-18 sqm: 1HP - 1.5HP',
+                '18-25 sqm: 1.5HP - 2HP',
+                '25-35 sqm: 2HP - 2.5HP'
+            ].join('\n')
+        };
+    }
+
+    if (includesAny(text, ['mataas bill', 'mataas kuryente', 'electric bill', 'consumption'])) {
+        return {
+            route: 'ROUTE: LOCAL_FAQ',
+            reply: [
+                'Common causes of high power consumption:',
+                '- Dirty filters',
+                '- Dirty evaporator coil',
+                '- Low refrigerant',
+                '- Incorrect thermostat settings',
+                '- Oversized usage hours',
+                '',
+                'PMS is recommended to improve cooling performance and efficiency.'
+            ].join('\n')
+        };
+    }
 
     const pricingReply = getLocalPricingReply(message);
-    if (pricingReply) return pricingReply;
-
-    if (['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'].includes(compactText)) {
-        return "Hi! I'm KODA. How can I help you today?";
+    if (pricingReply) {
+        return {
+            route: 'ROUTE: LOCAL_PRICING',
+            reply: withSoftSell(pricingReply, text)
+        };
     }
 
-    if (compactText.includes('contact number') || compactText.includes('phone number') || compactText.includes('number') || compactText.includes('tawag')) {
-        return 'You can contact DKC at 0927-686-3314 or landline (02) 8716-7334.';
+    if (['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'kumusta', 'kamusta', 'yo', 'sup'].includes(compactText)) {
+        return {
+            route: 'ROUTE: LOCAL_GREETING',
+            reply: "Hi! I'm KODA, DKC's HVAC Knowledge & Operations Assistant. How can I help you today?"
+        };
     }
 
-    if (compactText.includes('location') || compactText.includes('address') || compactText.includes('saan') || compactText.includes('located')) {
-        return 'DKC is located at Unit B, 1st Floor Malbarr Building, Brgy. Putatan, Muntinlupa City, Philippines, 1772.';
+    if (includesAny(text, ['sino ka', 'who are you', 'ano ka', 'what can you do', 'kaya mo ba'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: "I'm KODA, DKC's HVAC Knowledge & Operations Assistant. I can help with pricing, booking, maintenance tips, troubleshooting, installation information, and DKC services."
+        };
     }
 
-    if (compactText.includes('services') || compactText.includes('service offered') || compactText.includes('ano services')) {
-        return 'DKC offers aircon cleaning/PMS, repair, installation, freon charging, commercial HVAC, and refrigeration services. What service do you need help with?';
+    if (includesAny(text, ['why dkc', 'bakit dkc', 'why choose dkc', 'trusted ba kayo', 'bakit kayo pipiliin'])) {
+        return {
+            route: 'ROUTE: LOCAL_SALES',
+            reply: [
+                'Why Choose DKC?',
+                '',
+                '- Experienced Technicians',
+                '- Residential & Commercial Projects',
+                '- Fast Response Time',
+                '- Quality Workmanship',
+                '- Honest Assessment',
+                '- Affordable Pricing',
+                '- Preventive Maintenance Programs',
+                '- Installation, Repair, Cleaning & Refrigeration Services',
+                '- Muntinlupa-based Service Team',
+                '',
+                '"We Provide Good Service."'
+            ].join('\n')
+        };
     }
 
-    if (compactText.includes('book now') || compactText.includes('booking') || compactText.includes('schedule') || compactText.includes('appointment')) {
-        return 'Sure. To book, please contact DKC at 0927-686-3314 and share your aircon type, HP capacity, location, and preferred schedule.';
+    if (includesAny(text, ['trusted ba', 'may experience ba kayo'])) {
+        return {
+            route: 'ROUTE: LOCAL_SALES',
+            reply: [
+                'DKC handles residential and commercial airconditioning and refrigeration projects.',
+                '',
+                'Our team provides:',
+                '- Installation',
+                '- Preventive Maintenance',
+                '- Repair',
+                '- Refrigeration Services'
+            ].join('\n')
+        };
+    }
+
+    if (includesAny(text, ['tell me about dkc', 'about dkc', 'company profile', 'sino kayo', 'ano ang dkc'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: [
+                'DKC Airconditioning and Refrigeration Services',
+                '',
+                'Services:',
+                '- Supply',
+                '- Installation',
+                '- Cleaning/PMS',
+                '- Repair',
+                '- Freon Charging',
+                '- Refrigeration Services',
+                '- Commercial HVAC',
+                '',
+                'Location:',
+                'Unit B, 1st Floor Malbarr Building,',
+                'Brgy. Putatan, Muntinlupa City',
+                '',
+                'Contact:',
+                '0927-686-3314'
+            ].join('\n')
+        };
+    }
+
+    if (includesAny(text, ['service', 'services', 'ano serbisyo', 'offerings'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: withSoftSell([
+                'DKC services include:',
+                '- Supply',
+                '- Installation',
+                '- Cleaning/PMS',
+                '- Repair',
+                '- Freon Charging',
+                '- Refrigeration Services',
+                '- Commercial HVAC'
+            ].join('\n'), text)
+        };
+    }
+
+    if (includesAny(text, ['installation', 'install', 'pakabit', 'magpakabit'])) {
+        return {
+            route: 'ROUTE: LOCAL_UPSELL',
+            reply: [
+                'For installation inquiries, please share:',
+                '- Aircon type',
+                '- HP capacity',
+                '- Location',
+                '',
+                'DKC can also provide supply + installation packages.'
+            ].join('\n')
+        };
+    }
+
+    if (includesAny(text, ['repair', 'sira', 'ayaw lumamig', 'tumutulo', 'maingay', 'error code'])) {
+        return {
+            route: 'ROUTE: LOCAL_UPSELL',
+            reply: [
+                'To help with repair concerns, please share:',
+                '- Aircon type',
+                '- HP capacity',
+                '- What issue you noticed',
+                '- When it started',
+                '',
+                'We also recommend preventive maintenance after repairs.'
+            ].join('\n')
+        };
+    }
+
+    if (includesAny(text, ['contact', 'contact number', 'phone', 'call', 'landline', 'mobile', 'number', 'tawag'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: 'You can contact DKC here:\n0927-686-3314\n(02) 8716-7334'
+        };
+    }
+
+    if (includesAny(text, ['facebook', 'fb', 'tiktok', 'instagram'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: [
+                'Facebook:',
+                'DKC Aircon and Refrigeration Services',
+                '',
+                'TikTok:',
+                '@dkcairconofficial',
+                '',
+                'Instagram:',
+                '@dkcairconservices.ph'
+            ].join('\n')
+        };
+    }
+
+    if (includesAny(text, ['location', 'address', 'saan kayo', 'located'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: 'DKC is located at Unit B, 1st Floor Malbarr Building, Brgy. Putatan, Muntinlupa City, Philippines, 1772.'
+        };
+    }
+
+    if (includesAny(text, ['thank you', 'thanks', 'salamat'])) {
+        return {
+            route: 'ROUTE: LOCAL_GREETING',
+            reply: 'You\'re welcome! Glad to help. Let me know if you need assistance with your aircon.'
+        };
+    }
+
+    if (includesAny(text, ['pogi ba ako', 'maganda ba ako', 'cute ba ako'])) {
+        return {
+            route: 'ROUTE: LOCAL_JOKE',
+            reply: 'Syempre. Pero mas pogi kapag malamig ang aircon.'
+        };
     }
 
     if (compactText === '1+1' || compactText === '1 + 1') {
-        return '1 + 1 = 2. For aircon concerns, I can help with cleaning prices, troubleshooting, or booking details too.';
+        return {
+            route: 'ROUTE: LOCAL_JOKE',
+            reply: '1 + 1 = 2. For aircon concerns, I can help with cleaning prices, troubleshooting, or booking details too.'
+        };
     }
 
-    if (compactText.includes('joke')) {
-        return 'Quick one: Why did the aircon relax? Because it needed to chill. Need help with cleaning, repair, or booking?';
+    if (includesAny(text, ['joke', 'tell me a joke', 'funny'])) {
+        return {
+            route: 'ROUTE: LOCAL_JOKE',
+            reply: 'Bakit malamig ang aircon? Kasi ayaw niyang mainitan sa trabaho.'
+        };
+    }
+
+    if (includesAny(text, ['mainit panahon', 'ang init', 'init ngayon', 'mainit'])) {
+        return {
+            route: 'ROUTE: LOCAL_FAQ',
+            reply: 'Stay hydrated, and make sure your aircon filters are clean for better cooling. Parang sign na rin yan para magpa-PMS ng aircon.'
+        };
+    }
+
+    if (includesAny(text, ['kamusta', 'anong ginagawa mo', 'busy ka ba'])) {
+        return {
+            route: 'ROUTE: LOCAL_GREETING',
+            reply: 'Always ready to help with DKC services. What aircon concern can I help you with?'
+        };
+    }
+
+    if (includesAny(text, ['how often maintenance', 'maintenance'])) {
+        return {
+            route: 'ROUTE: LOCAL_FAQ',
+            reply: 'Residential: every 3-6 months.\nCommercial: every 1-3 months.\nRegular PMS helps keep cooling strong and can reduce costly repairs.'
+        };
+    }
+
+    if (includesAny(text, ['open kayo', 'office hours'])) {
+        return {
+            route: 'ROUTE: LOCAL_SERVICE',
+            reply: 'For scheduling and inquiries, please contact 0927-686-3314, or visit Unit B, 1st Floor Malbarr Building, Brgy. Putatan, Muntinlupa City.'
+        };
+    }
+
+    if (exchangeCount >= 3 && includesAny(text, ['help', 'pwede', 'ok', 'sige', 'interested'])) {
+        return {
+            route: 'ROUTE: LOCAL_SALES',
+            reply: 'Would you like me to help schedule a DKC technician visit?'
+        };
     }
 
     return null;
@@ -356,14 +679,14 @@ module.exports = async function handler(req, res) {
             { role: 'user', content: message.slice(0, 2000) }
         ].slice(-18);
 
-        const localReply = getLocalReply(message);
-        if (localReply) {
-            console.log('ROUTE: LOCAL');
+        const localRoute = getLocalRoute(message, history, sessionId);
+        if (localRoute) {
+            console.log(localRoute.route);
             kodaSessions.set(sessionId, [
                 ...conversation,
-                { role: 'assistant', content: localReply }
+                { role: 'assistant', content: localRoute.reply }
             ].slice(-20));
-            res.status(200).json({ reply: localReply });
+            res.status(200).json({ reply: localRoute.reply });
             return;
         }
 
