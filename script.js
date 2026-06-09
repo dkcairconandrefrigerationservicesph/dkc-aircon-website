@@ -287,9 +287,9 @@ function initContactForm() {
     const contactForm = document.getElementById('contact-form');
     const formMessage = document.querySelector('.contact-form-message');
     const submitButton = contactForm?.querySelector('button[type="submit"]');
-    const emailJsPublicKey = 'hkm69zLQUWubyiElH';
-    const emailJsServiceId = 'service_2seef04';
-    const emailJsTemplateId = 'template_v90dnbw';
+    const EMAILJS_PUBLIC_KEY = 'hkm69zLQUWubyiElH';
+    const EMAILJS_SERVICE_ID = 'service_2seef04';
+    const EMAILJS_TEMPLATE_ID = 'template_v90dnbw';
     const facebookUrl = 'https://www.facebook.com/profile.php?id=100063675776144';
 
     const showMessage = (message, type = 'success') => {
@@ -353,6 +353,7 @@ function initContactForm() {
             }
 
             console.log("EmailJS ready:", typeof emailjs !== "undefined");
+            console.log("EmailJS public key configured:", Boolean(EMAILJS_PUBLIC_KEY));
 
             if (!window.emailjs) {
                 showFallbackMessage();
@@ -364,9 +365,9 @@ function initContactForm() {
             const templateParams = buildBookingPayload();
             console.log("Booking payload:", templateParams);
 
-            emailjs.init(emailJsPublicKey);
+            emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
-            emailjs.send(emailJsServiceId, emailJsTemplateId, templateParams)
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY)
                 .then(function(response) {
                     console.log("Booking email sent successfully:", response);
                     showMessage('Your booking request has been sent successfully. DKC will contact you shortly.');
