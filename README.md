@@ -42,3 +42,5 @@ The `npm run serve` command only runs the legacy `server.js` local Node server. 
 5. Test KODA on the deployed Vercel URL.
 
 If the site is opened directly from `index.html` or served on pure GitHub Pages, KODA shows a safe fallback message instead of appearing broken.
+
+Vercel deployment trigger - 06/09/2026 10:50:59
