@@ -287,7 +287,7 @@ function initContactForm() {
     const contactForm = document.getElementById('contact-form');
     const formMessage = document.querySelector('.contact-form-message');
     const submitButton = contactForm?.querySelector('button[type="submit"]');
-    const emailJsPublicKey = 'CW1_M1d7Y_UVzjm7G';
+    const emailJsPublicKey = 'hkm69zLQUWubyiElH';
     const emailJsServiceId = 'service_2seef04';
     const emailJsTemplateId = 'template_v90dnbw';
     const facebookUrl = 'https://www.facebook.com/profile.php?id=100063675776144';
@@ -351,6 +351,8 @@ function initContactForm() {
             if (nameField && duplicateName) {
                 duplicateName.value = nameField.value;
             }
+
+            console.log("EmailJS ready:", typeof emailjs !== "undefined");
 
             if (!window.emailjs) {
                 showFallbackMessage();
