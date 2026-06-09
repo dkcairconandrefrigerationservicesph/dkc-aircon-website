@@ -270,6 +270,7 @@ function extractLeadData(message) {
         location: /location\s*:\s*([^\n]+)/i,
         airconType: /(aircon type|type)\s*:\s*([^\n]+)/i,
         hpCapacity: /(hp capacity|hp)\s*:\s*([^\n]+)/i,
+        serviceNeeded: /(service needed|service)\s*:\s*([^\n]+)/i,
         concern: /concern\s*:\s*([^\n]+)/i
     };
 
@@ -280,6 +281,30 @@ function extractLeadData(message) {
     });
 
     return fields;
+}
+
+function bookingDetailsReply(leadData) {
+    const labels = {
+        name: 'Name',
+        contactNumber: 'Contact Number',
+        location: 'Location',
+        airconType: 'Aircon Type',
+        hpCapacity: 'HP Capacity',
+        serviceNeeded: 'Service Needed',
+        concern: 'Concern'
+    };
+    const summary = Object.entries(labels)
+        .filter(([field]) => leadData[field])
+        .map(([field, label]) => `${label}: ${leadData[field]}`);
+
+    return [
+        summary.length ? "Here's what I got:" : 'Great, I have your booking details here in this chat.',
+        ...summary,
+        '',
+        "However, I'm still in beta and I can't officially send these details to DKC yet.",
+        '',
+        'For faster confirmation, please message DKC Aircon and Refrigeration Services on Facebook or call 0927-686-3314.'
+    ].join('\n');
 }
 
 function getLocalRoute(message, history, sessionId) {
@@ -323,8 +348,8 @@ function getLocalRoute(message, history, sessionId) {
             updatedAt: new Date().toISOString()
         });
         return {
-            route: 'ROUTE: LOCAL_LEAD_CAPTURE',
-            reply: 'Got it. I saved those details for this chat. DKC can use them to help with your inquiry or schedule.'
+            route: 'ROUTE: LOCAL_BOOKING_DETAILS',
+            reply: bookingDetailsReply(leadData)
         };
     }
 

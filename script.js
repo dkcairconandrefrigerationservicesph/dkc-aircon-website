@@ -287,9 +287,10 @@ function initContactForm() {
     const contactForm = document.getElementById('contact-form');
     const formMessage = document.querySelector('.contact-form-message');
     const submitButton = contactForm?.querySelector('button[type="submit"]');
-    const bookingEmail = 'dkcservices0912@gmail.com';
+    const emailJsPublicKey = 'CW1_M1d7Y_UVzjm7G';
+    const emailJsServiceId = 'service_2seef04';
+    const emailJsTemplateId = 'template_v90dnbw';
     const facebookUrl = 'https://www.facebook.com/profile.php?id=100063675776144';
-    const viberUrl = 'viber://chat?number=09276863314';
 
     const showMessage = (message, type = 'success') => {
         if (!formMessage) return;
@@ -305,22 +306,28 @@ function initContactForm() {
         return field ? field.value.trim() : '';
     };
 
-    const createMailtoLink = () => {
-        const subject = encodeURIComponent('New Booking Request - DKC');
+    const getSelectedService = () => {
         const serviceField = contactForm?.querySelector('[name="service"]');
-        const service = serviceField?.selectedOptions?.[0]?.textContent?.trim() || getFormValue('service') || 'Not specified';
-        const body = encodeURIComponent([
-            'Hello DKC, I would like to request a service.',
-            '',
-            `Name: ${getFormValue('from_name')}`,
-            `Email: ${getFormValue('email')}`,
-            `Phone: ${getFormValue('phone')}`,
-            `Service: ${service}`,
-            `Message: ${getFormValue('message') || 'No message provided'}`
-        ].join('\n'));
-
-        return `mailto:${bookingEmail}?subject=${subject}&body=${body}`;
+        return serviceField?.selectedOptions?.[0]?.textContent?.trim() || getFormValue('service') || 'Not specified';
     };
+
+    const buildBookingPayload = (readValue = getFormValue, readService = getSelectedService) => {
+        const customerMessage = readValue('message') || 'No message provided';
+        return {
+            from_name: readValue('from_name'),
+            phone: readValue('phone'),
+            email: readValue('email'),
+            service: readService(),
+            message: [
+                `Location: ${readValue('location') || 'Not provided'}`,
+                `Aircon Type: ${readValue('aircon_type') || 'Not provided'}`,
+                `HP Capacity: ${readValue('hp_capacity') || 'Not provided'}`,
+                `Concern/Message: ${customerMessage}`
+            ].join('\n')
+        };
+    };
+
+    window.dkcBuildBookingPayload = buildBookingPayload;
 
     const setSubmitState = (isSending) => {
         if (!submitButton) return;
@@ -330,7 +337,7 @@ function initContactForm() {
 
     const showFallbackMessage = () => {
         showMessage(
-            `We could not send the booking form right now. Please send your request directly via <a href="${createMailtoLink()}">email</a>, <a href="${facebookUrl}" target="_blank" rel="noopener noreferrer">Facebook</a>, or <a href="${viberUrl}">Viber</a>.`,
+            `We could not send the booking form right now. Please message us directly on <a href="${facebookUrl}" target="_blank" rel="noopener noreferrer">Facebook</a> or call 0927-686-3314.`,
             'error'
         );
     };
@@ -351,18 +358,20 @@ function initContactForm() {
             }
 
             setSubmitState(true);
-            
-            // Initialize EmailJS with your public key
-            emailjs.init('CW1_M1d7Y_UVzjm7G');
-            
-            // Send email
-            emailjs.sendForm('service_2seef04', 'template_v90dnbw', this)
-                .then(function() {
-                    showMessage('Thank you! Your booking request has been sent. If you do not receive confirmation by email, please also message us on <a href="https://www.facebook.com/profile.php?id=100063675776144" target="_blank" rel="noopener noreferrer">Facebook</a> or call us on <a href="viber://chat?number=09276863314">Viber</a>.');
+
+            const templateParams = buildBookingPayload();
+            console.log("Booking payload:", templateParams);
+
+            emailjs.init(emailJsPublicKey);
+
+            emailjs.send(emailJsServiceId, emailJsTemplateId, templateParams)
+                .then(function(response) {
+                    console.log("Booking email sent successfully:", response);
+                    showMessage('Your booking request has been sent successfully. DKC will contact you shortly.');
                     contactForm.reset();
                 }, function(error) {
                     showFallbackMessage();
-                    console.error('EmailJS error:', error);
+                    console.error("Booking email failed:", error);
                 })
                 .finally(function() {
                     setSubmitState(false);
