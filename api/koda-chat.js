@@ -43,13 +43,18 @@ function loadLocalEnvFiles() {
 
 loadLocalEnvFiles();
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const GEMINI_MODELS = [
+    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash',
+    'gemini-2.5-flash'
+];
 console.log('GEMINI_API_KEY loaded:', !!process.env.GEMINI_API_KEY);
-console.log('GEMINI_MODEL:', MODEL);
+console.log('GEMINI_MODEL:', GEMINI_MODELS[0]);
+console.log('GEMINI_MODEL_FALLBACKS:', GEMINI_MODELS.join(', '));
 
 const kodaSessions = new Map();
-const geminiRetryDelays = [1000, 2000, 4000];
-const aiTrafficMessage = 'KODA is currently experiencing high AI traffic. Please try again in a few moments.';
+const geminiRetryDelays = [1000, 2000];
+const aiTrafficMessage = 'Medyo busy lang si KODA ngayon. For urgent concerns, please call DKC at 0927-686-3314.';
 
 const kodaSystemPrompt = `
 You are KODA, DKC's HVAC Knowledge & Operations Digital Assistant.
@@ -151,6 +156,79 @@ function extractGeminiText(response) {
         .trim();
 }
 
+function normalizePricingText(message) {
+    return message
+        .toLowerCase()
+        .replace(/[–—]/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function isCleaningPriceQuestion(text) {
+    return (
+        (text.includes('magkano') || text.includes('price') || text.includes('presyo') || text.includes('rate')) &&
+        (text.includes('cleaning') || text.includes('linis') || text.includes('pms') || text.includes('aircon'))
+    );
+}
+
+function hasRepairIntent(text) {
+    return [
+        'hindi lumalamig',
+        'not cooling',
+        'leak',
+        'leaking',
+        'tulo',
+        'tumulo',
+        'ingay',
+        'noise',
+        'amoy',
+        'smell',
+        'sira',
+        'repair',
+        'error',
+        'yelo',
+        'ice',
+        'install',
+        'installation'
+    ].some(term => text.includes(term));
+}
+
+function hasHp(text, values) {
+    return values.some(value => {
+        const escapedValue = value.replace('.', '\\.');
+        return new RegExp(`(^|\\D)${escapedValue}\\s*(hp|horsepower)?(\\D|$)`).test(text);
+    });
+}
+
+function getLocalPricingReply(message) {
+    const text = normalizePricingText(message);
+    const mentionsWindow = text.includes('window');
+    const mentionsSplit = text.includes('split');
+    const mentionsKnownTypeAndHp = (mentionsWindow || mentionsSplit) && hasHp(text, ['1', '1.5', '2', '2.5']);
+
+    if (!isCleaningPriceQuestion(text) && (!mentionsKnownTypeAndHp || hasRepairIntent(text))) {
+        return null;
+    }
+
+    if (mentionsWindow && hasHp(text, ['1']) && !hasHp(text, ['1.5', '2'])) {
+        return 'For Window Type 1HP, standard cleaning is ₱600.';
+    }
+
+    if (mentionsWindow && hasHp(text, ['1.5', '2'])) {
+        return 'For Window Type 1.5HP–2HP, standard cleaning is ₱800.';
+    }
+
+    if (mentionsSplit && hasHp(text, ['1', '1.5'])) {
+        return 'For Split Type 1HP–1.5HP, standard cleaning is ₱1,300.';
+    }
+
+    if (mentionsSplit && hasHp(text, ['2', '2.5'])) {
+        return 'For Split Type 2HP–2.5HP, standard cleaning is ₱1,800.';
+    }
+
+    return 'May I know your aircon type and HP capacity? Window type or split type?';
+}
+
 function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -165,6 +243,7 @@ function isRetryableGeminiError(error) {
         error?.message,
         error?.statusText,
         error?.error?.message,
+        error?.error?.status,
         error?.response?.statusText
     ]
         .filter(Boolean)
@@ -176,21 +255,30 @@ function isRetryableGeminiError(error) {
         status === '429' ||
         status === '503' ||
         status === 'UNAVAILABLE' ||
+        status === 'RESOURCE_EXHAUSTED' ||
         message.includes('429') ||
         message.includes('503') ||
         message.includes('UNAVAILABLE') ||
+        message.includes('RESOURCE_EXHAUSTED') ||
+        message.includes('OVERLOADED') ||
+        message.includes('OVERLOAD') ||
+        message.includes('HIGH TRAFFIC') ||
         message.includes('HIGH DEMAND');
 }
 
 async function generateGeminiContentWithRetry(ai, request) {
     let lastError;
 
-    for (let attempt = 0; attempt <= geminiRetryDelays.length; attempt += 1) {
+    for (let attempt = 0; attempt < GEMINI_MODELS.length; attempt += 1) {
+        const model = GEMINI_MODELS[attempt];
         try {
-            return await ai.models.generateContent(request);
+            return await ai.models.generateContent({
+                ...request,
+                model
+            });
         } catch (error) {
             lastError = error;
-            if (!isRetryableGeminiError(error) || attempt === geminiRetryDelays.length) {
+            if (!isRetryableGeminiError(error) || attempt === GEMINI_MODELS.length - 1) {
                 throw error;
             }
 
@@ -225,18 +313,28 @@ module.exports = async function handler(req, res) {
             return;
         }
 
+        const conversation = [
+            ...sessionHistory,
+            ...history,
+            { role: 'user', content: message.slice(0, 2000) }
+        ].slice(-18);
+
+        const localPricingReply = getLocalPricingReply(message);
+        if (localPricingReply) {
+            kodaSessions.set(sessionId, [
+                ...conversation,
+                { role: 'assistant', content: localPricingReply }
+            ].slice(-20));
+            res.status(200).json({ reply: localPricingReply });
+            return;
+        }
+
         if (!process.env.GEMINI_API_KEY) {
             res.status(500).json({
                 error: 'GEMINI_API_KEY is not configured'
             });
             return;
         }
-
-        const conversation = [
-            ...sessionHistory,
-            ...history,
-            { role: 'user', content: message.slice(0, 2000) }
-        ].slice(-18);
 
         const ai = new GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY
@@ -245,7 +343,6 @@ module.exports = async function handler(req, res) {
         let response;
         try {
             response = await generateGeminiContentWithRetry(ai, {
-                model: MODEL,
                 contents: conversation.map(toGeminiContent),
                 config: {
                     systemInstruction: kodaSystemPrompt,
