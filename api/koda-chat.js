@@ -165,7 +165,10 @@ function normalizePricingText(message) {
 }
 
 function isCleaningPriceQuestion(text) {
-    return text.includes('magkano cleaning') ||
+    return text.includes('magkano') ||
+        text.includes('price') ||
+        text.includes('presyo') ||
+        text.includes('magkano cleaning') ||
         text.includes('presyo cleaning') ||
         text.includes('cleaning price') ||
         text.includes('cleaning') ||
@@ -174,28 +177,6 @@ function isCleaningPriceQuestion(text) {
         text.includes('split type') ||
         text.includes('window type') ||
         text.includes('hp');
-}
-
-function hasRepairIntent(text) {
-    return [
-        'hindi lumalamig',
-        'not cooling',
-        'leak',
-        'leaking',
-        'tulo',
-        'tumulo',
-        'ingay',
-        'noise',
-        'amoy',
-        'smell',
-        'sira',
-        'repair',
-        'error',
-        'yelo',
-        'ice',
-        'install',
-        'installation'
-    ].some(term => text.includes(term));
 }
 
 function hasHp(text, values) {
@@ -212,7 +193,7 @@ function getLocalPricingReply(message) {
     const mentionsKnownTypeAndHp = (mentionsWindow || mentionsSplit) && hasHp(text, ['1', '1.5', '2', '2.5']);
     const pricingRelated = isCleaningPriceQuestion(text);
 
-    if ((!pricingRelated && !mentionsKnownTypeAndHp) || hasRepairIntent(text)) {
+    if (!pricingRelated && !mentionsKnownTypeAndHp) {
         return null;
     }
 
@@ -245,6 +226,44 @@ function getLocalPricingReply(message) {
     }
 
     return 'May I know your aircon type and HP capacity? Window type or split type?';
+}
+
+function getLocalReply(message) {
+    const text = normalizePricingText(message);
+    const compactText = text.replace(/[!?.,]/g, '');
+
+    const pricingReply = getLocalPricingReply(message);
+    if (pricingReply) return pricingReply;
+
+    if (['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'].includes(compactText)) {
+        return "Hi! I'm KODA. How can I help you today?";
+    }
+
+    if (compactText.includes('contact number') || compactText.includes('phone number') || compactText.includes('number') || compactText.includes('tawag')) {
+        return 'You can contact DKC at 0927-686-3314 or landline (02) 8716-7334.';
+    }
+
+    if (compactText.includes('location') || compactText.includes('address') || compactText.includes('saan') || compactText.includes('located')) {
+        return 'DKC is located at Unit B, 1st Floor Malbarr Building, Brgy. Putatan, Muntinlupa City, Philippines, 1772.';
+    }
+
+    if (compactText.includes('services') || compactText.includes('service offered') || compactText.includes('ano services')) {
+        return 'DKC offers aircon cleaning/PMS, repair, installation, freon charging, commercial HVAC, and refrigeration services. What service do you need help with?';
+    }
+
+    if (compactText.includes('book now') || compactText.includes('booking') || compactText.includes('schedule') || compactText.includes('appointment')) {
+        return 'Sure. To book, please contact DKC at 0927-686-3314 and share your aircon type, HP capacity, location, and preferred schedule.';
+    }
+
+    if (compactText === '1+1' || compactText === '1 + 1') {
+        return '1 + 1 = 2. For aircon concerns, I can help with cleaning prices, troubleshooting, or booking details too.';
+    }
+
+    if (compactText.includes('joke')) {
+        return 'Quick one: Why did the aircon relax? Because it needed to chill. Need help with cleaning, repair, or booking?';
+    }
+
+    return null;
 }
 
 function wait(ms) {
@@ -337,15 +356,14 @@ module.exports = async function handler(req, res) {
             { role: 'user', content: message.slice(0, 2000) }
         ].slice(-18);
 
-        const localPricingReply = getLocalPricingReply(message);
-        if (localPricingReply) {
-            console.log('LOCAL_PRICING_MATCH');
-            console.log('ROUTE: LOCAL_PRICING');
+        const localReply = getLocalReply(message);
+        if (localReply) {
+            console.log('ROUTE: LOCAL');
             kodaSessions.set(sessionId, [
                 ...conversation,
-                { role: 'assistant', content: localPricingReply }
+                { role: 'assistant', content: localReply }
             ].slice(-20));
-            res.status(200).json({ reply: localPricingReply });
+            res.status(200).json({ reply: localReply });
             return;
         }
 
