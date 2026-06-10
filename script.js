@@ -487,11 +487,13 @@ function initDkcAssistant() {
     let introShown = conversationHistory.length > 0;
     let isWaitingForReply = false;
     const sessionId = getKodaSessionId(sessionKey);
+    const mobileKodaQuery = window.matchMedia('(max-width: 768px)');
 
     if (!assistant || !toggle || !messages || !form || !input) return;
 
     const setOpen = (isOpen) => {
         assistant.classList.toggle('is-open', isOpen);
+        document.body.classList.toggle('koda-mobile-open', isOpen && mobileKodaQuery.matches);
         toggle.setAttribute('aria-expanded', String(isOpen));
         const panel = assistant.querySelector('.ai-assistant-panel');
         if (panel) panel.setAttribute('aria-hidden', String(!isOpen));
@@ -503,6 +505,10 @@ function initDkcAssistant() {
                 scrollKodaToBottom(messages);
             }, 120);
         }
+    };
+
+    const syncKodaViewportState = () => {
+        document.body.classList.toggle('koda-mobile-open', assistant.classList.contains('is-open') && mobileKodaQuery.matches);
     };
 
     const saveHistory = () => {
@@ -630,6 +636,14 @@ function initDkcAssistant() {
     });
 
     close?.addEventListener('click', () => setOpen(false));
+
+    mobileKodaQuery.addEventListener?.('change', syncKodaViewportState);
+    window.addEventListener('resize', syncKodaViewportState, { passive: true });
+    window.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && assistant.classList.contains('is-open')) {
+            setOpen(false);
+        }
+    });
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
