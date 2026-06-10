@@ -3324,7 +3324,7 @@ section {
         bottom: 14px;
         width: 58px;
         height: 58px;
-        z-index: 1500;
+        z-index: 10020;
     }
 
     .ai-assistant-toggle {
@@ -3334,7 +3334,7 @@ section {
         width: 58px;
         height: 58px;
         margin-left: 0;
-        z-index: 1502;
+        z-index: 10022;
     }
 
     .ai-assistant-toggle img {
@@ -3350,7 +3350,7 @@ section {
         max-height: none;
         border-radius: 0;
         border: 0;
-        z-index: 1501;
+        z-index: 10021;
         background:
             radial-gradient(circle at 50% -10%, rgba(125, 220, 255, 0.16), transparent 36%),
             rgba(5, 15, 28, 0.98);
@@ -3360,12 +3360,10 @@ section {
     }
 
     .ai-assistant.is-open .ai-assistant-toggle {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transform: scale(0.9);
-        filter: saturate(0.9) brightness(0.92);
-        box-shadow: 0 18px 54px rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(10px) scale(0.88);
     }
 
     .ai-assistant.is-open .ai-assistant-panel {
@@ -3420,7 +3418,7 @@ section {
 
     .ai-form {
         min-height: 72px;
-        padding: 10px 84px max(12px, env(safe-area-inset-bottom)) 14px;
+        padding: 10px 14px max(12px, env(safe-area-inset-bottom));
         background: rgba(7, 14, 26, 0.88);
         backdrop-filter: blur(22px);
         -webkit-backdrop-filter: blur(22px);
