@@ -88,10 +88,11 @@ You can answer questions about:
 - Common aircon issues like weak cooling, leaking, noise, bad smell, ice buildup, high electricity bill, and error codes
 
 Cleaning/PMS pricing:
-- Window Type 1HP: ₱600
-- Window Type 1.5HP-2HP: ₱800
-- Split Type 1HP-1.5HP: ₱1,300
-- Split Type 2HP-2.5HP: ₱1,800
+- U-Type Window Type: ₱1,200
+- Box Type Window Type: ₱800-₱1,000
+- Split Type Wall Mounted 1HP-1.5HP: ₱1,500
+- Split Type Wall Mounted 2HP-2.5HP: ₱2,000
+- Split Type Wall Mounted 3HP: ₱2,500
 
 Pricing rules:
 - If user asks for a listed cleaning/PMS price, answer directly.
@@ -99,7 +100,7 @@ Pricing rules:
 - If a service, aircon type, or HP capacity is not listed, say that it is not listed in the standard cleaning price guide and recommend contacting DKC directly for a quotation.
 - For repair, installation, freon charging, commercial HVAC, refrigeration, cassette type, floor mounted, ceiling suspended, VRF/VRV, or chiller pricing, do not invent a price. Recommend contacting DKC.
 - If the user asks "Magkano cleaning?" or similar without type/HP, ask for the aircon type and HP capacity.
-- If the user asks "Magkano cleaning ng split 1.5hp?", answer that Split Type 1HP-1.5HP standard cleaning is ₱1,300.
+- If the user asks "Magkano cleaning ng split 1.5hp?", answer that Split Type Wall Mounted 1HP-1.5HP standard cleaning is ₱1,500.
 
 Repair and troubleshooting rules:
 - Give possible causes only, not final diagnosis.
@@ -195,39 +196,53 @@ function getLocalPricingReply(message) {
     const text = normalizePricingText(message);
     const mentionsWindow = text.includes('window');
     const mentionsSplit = text.includes('split');
-    const mentionsKnownTypeAndHp = (mentionsWindow || mentionsSplit) && hasHp(text, ['1', '1.5', '2', '2.5']);
+    const mentionsUType = text.includes('u type') || text.includes('u-type') || text.includes('utype');
+    const mentionsBoxType = text.includes('box type') || text.includes('box-type') || text.includes('boxtype');
+    const mentionsKnownTypeAndHp = (mentionsWindow || mentionsSplit) && hasHp(text, ['1', '1.5', '2', '2.5', '3']);
     const pricingRelated = isPricingQuestion(text);
 
-    if (!pricingRelated && !mentionsKnownTypeAndHp) {
+    if (!pricingRelated && !mentionsKnownTypeAndHp && !mentionsUType && !mentionsBoxType) {
         return null;
     }
 
+    if (mentionsWindow && mentionsUType) {
+        return 'For U-Type Window Type, standard cleaning is ₱1,200.';
+    }
+
+    if (mentionsWindow && mentionsBoxType) {
+        return 'For Box Type Window Type, standard cleaning is ₱800-₱1,000.';
+    }
+
     if (mentionsSplit && text.includes('1.5')) {
-        return 'For Split Type 1HP–1.5HP, standard cleaning is ₱1,300.';
+        return 'For Split Type Wall Mounted 1HP-1.5HP, standard cleaning is ₱1,500.';
     }
 
     if (mentionsSplit && text.includes('2.5')) {
-        return 'For Split Type 2HP–2.5HP, standard cleaning is ₱1,800.';
+        return 'For Split Type Wall Mounted 2HP-2.5HP, standard cleaning is ₱2,000.';
     }
 
-    if (mentionsWindow && text.includes('1.5')) {
-        return 'For Window Type 1.5HP–2HP, standard cleaning is ₱800.';
-    }
-
-    if (mentionsWindow && hasHp(text, ['1']) && !hasHp(text, ['1.5', '2'])) {
-        return 'For Window Type 1HP, standard cleaning is ₱600.';
-    }
-
-    if (mentionsWindow && hasHp(text, ['1.5', '2'])) {
-        return 'For Window Type 1.5HP–2HP, standard cleaning is ₱800.';
+    if (mentionsSplit && hasHp(text, ['3'])) {
+        return 'For Split Type Wall Mounted 3HP, standard cleaning is ₱2,500.';
     }
 
     if (mentionsSplit && hasHp(text, ['1', '1.5'])) {
-        return 'For Split Type 1HP–1.5HP, standard cleaning is ₱1,300.';
+        return 'For Split Type Wall Mounted 1HP-1.5HP, standard cleaning is ₱1,500.';
     }
 
     if (mentionsSplit && hasHp(text, ['2', '2.5'])) {
-        return 'For Split Type 2HP–2.5HP, standard cleaning is ₱1,800.';
+        return 'For Split Type Wall Mounted 2HP-2.5HP, standard cleaning is ₱2,000.';
+    }
+
+    if (mentionsWindow) {
+        return 'For Window Type cleaning, is it U-Type or Box Type? U-Type is ₱1,200, while Box Type is ₱800-₱1,000.';
+    }
+
+    if (mentionsUType) {
+        return 'For U-Type Window Type, standard cleaning is ₱1,200.';
+    }
+
+    if (mentionsBoxType) {
+        return 'For Box Type Window Type, standard cleaning is ₱800-₱1,000.';
     }
 
     return 'May I know your aircon type and HP capacity? Window type or split type?';
