@@ -650,6 +650,8 @@ function initKodaEasterEgg() {
         element.style.setProperty('--karaoke-duration', `${revealSeconds}s`);
         element.style.setProperty('--karaoke-count', charCount);
         element.innerHTML = '';
+        const lineWrap = document.createElement('span');
+        lineWrap.className = 'karaoke-line';
 
         characters.forEach((character, charIndex) => {
             const span = document.createElement('span');
@@ -658,9 +660,10 @@ function initKodaEasterEgg() {
             span.style.setProperty('--char-index', charIndex);
             span.style.animationDelay = `${(revealSeconds * charIndex) / charCount}s`;
             span.style.animationDuration = `${index >= 6 ? 0.42 : 0.34}s`;
-            fragment.appendChild(span);
+            lineWrap.appendChild(span);
         });
 
+        fragment.appendChild(lineWrap);
         element.appendChild(fragment);
     };
 
