@@ -39,8 +39,9 @@ const kodaEasterConfig = {
     endingSubheading: 'We Provide Good Service',
     endingButtonText: 'Book Now',
     endingButtonTarget: '#contact',
-    lyricFadeDuration: 600,
-    lyricHoldGap: 100,
+    lyricFadeDuration: 900,
+    lyricHoldGap: 240,
+    typingSpeed: 38,
     lyricPositions: [
         'position-center',
         'position-upper-left',
@@ -591,11 +592,35 @@ function initKodaEasterEgg() {
         return card;
     };
 
-    const buildLyricLine = (text, positionClass) => {
+    const buildLyricLine = (text, positionClass, isChorus = false) => {
         const line = document.createElement('div');
-        line.className = `koda-easter-lyric-line ${positionClass}`;
-        line.textContent = text;
+        line.className = `koda-easter-lyric-line ${positionClass}${isChorus ? ' chorus' : ''}`;
+        line.dataset.fullText = text;
+        line.textContent = '';
         return line;
+    };
+
+    const applyTypingEffect = (line) => {
+        const text = line.dataset.fullText || '';
+        const length = Math.max(0, text.length);
+        const speed = Math.max(20, kodaEasterConfig.typingSpeed - Math.min(18, Math.floor(length / 2)));
+        let index = 0;
+
+        line.classList.add('typing');
+        if (line._typingInterval) {
+            clearInterval(line._typingInterval);
+        }
+
+        line._typingInterval = setInterval(() => {
+            if (index >= length) {
+                clearInterval(line._typingInterval);
+                line._typingInterval = null;
+                line.classList.remove('typing');
+                line.classList.add('typed');
+                return;
+            }
+            line.textContent += text[index++];
+        }, speed);
     };
 
     const getPositionClass = (index) => {
@@ -648,14 +673,18 @@ function initKodaEasterEgg() {
 
     const fadeOutOldLines = () => {
         const lines = lyricStack.querySelectorAll('.koda-easter-lyric-line');
-        if (lines.length <= 3) return;
+        if (lines.length <= 5) return;
         const [first] = lines;
+        if (first._typingInterval) {
+            clearInterval(first._typingInterval);
+            first._typingInterval = null;
+        }
         first.classList.add('remove');
         setTimeout(() => {
             if (first.parentElement) {
                 first.parentElement.removeChild(first);
             }
-        }, 600);
+        }, kodaEasterConfig.lyricFadeDuration + 120);
     };
 
     const showLyric = (index) => {
@@ -673,7 +702,8 @@ function initKodaEasterEgg() {
         }
 
         const positionClass = getPositionClass(index);
-        const newLine = buildLyricLine(lyric, positionClass);
+        const isChorus = index >= 7;
+        const newLine = buildLyricLine(lyric, positionClass, isChorus);
         lyricStack.appendChild(newLine);
 
         requestAnimationFrame(() => {
@@ -685,7 +715,14 @@ function initKodaEasterEgg() {
             newLine.classList.add('visible');
         });
 
+        applyTypingEffect(newLine);
         fadeOutOldLines();
+
+        if (isChorus) {
+            overlay.classList.add('lyric-surge', 'flash-burst');
+            setTimeout(() => overlay.classList.remove('flash-burst'), 240);
+            setTimeout(() => overlay.classList.remove('lyric-surge'), 900);
+        }
 
         if (index === 1 || index === 4 || index === 7 || index === 9) {
             showFlashCard(index);
