@@ -744,6 +744,17 @@ function initKodaEasterEgg() {
 
     const setOverlayMood = (index) => {
         overlay.classList.remove('phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale');
+        const tension = Math.min(1, index / Math.max(1, kodaEasterConfig.lyricSequence.length - 1));
+        overlay.style.setProperty('--koda-tension', `${tension}`);
+        overlay.style.setProperty('--koda-danger-a', `${0.12 + tension * 0.18}`);
+        overlay.style.setProperty('--koda-blue-a', `${0.1 + tension * 0.12}`);
+        overlay.style.setProperty('--koda-grain-a', `${0.28 + tension * 0.22}`);
+        overlay.style.setProperty('--koda-lyric-glow-size', `${34 + tension * 34}px`);
+        overlay.style.setProperty('--koda-lyric-glow-a', `${0.24 + tension * 0.22}`);
+        overlay.style.setProperty('--koda-red-ghost-a', `${0.16 + tension * 0.18}`);
+        overlay.style.setProperty('--koda-blue-ghost-a', `${0.12 + tension * 0.14}`);
+        overlay.style.setProperty('--koda-danger-frame-size', `${110 + tension * 170}px`);
+        overlay.style.setProperty('--koda-danger-frame-a', `${0.2 + tension * 0.32}`);
         if (index >= 9) {
             overlay.classList.add('phase-finale');
         } else if (index >= 6) {
@@ -772,6 +783,14 @@ function initKodaEasterEgg() {
             overlay.classList.add('panic-cut');
         }
         queueEffectTimeout(() => overlay.classList.remove('flash-burst', 'impact-shake', 'panic-cut', 'screen-ripple'), duration);
+    };
+
+    const hitNewLyric = (index) => {
+        overlay.classList.add('lyric-hit', 'scan-hit');
+        if (index >= 6) {
+            overlay.classList.add('danger-frame');
+        }
+        queueEffectTimeout(() => overlay.classList.remove('lyric-hit', 'scan-hit', 'danger-frame'), index >= 6 ? 460 : 320);
     };
 
     const scheduleEffectBursts = (index, durationSeconds) => {
@@ -811,7 +830,7 @@ function initKodaEasterEgg() {
         kodaEasterState.currentLyricIndex = kodaEasterConfig.lyricSequence.length;
         kodaEasterState.effectTimeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
         kodaEasterState.effectTimeoutIds = [];
-        overlay.classList.remove('flash-burst', 'lyric-surge', 'beat-cut', 'impact-shake', 'panic-cut');
+        overlay.classList.remove('flash-burst', 'lyric-surge', 'beat-cut', 'impact-shake', 'panic-cut', 'lyric-hit', 'danger-frame', 'screen-ripple', 'scan-hit');
         overlay.classList.add('phase-finale');
         lyricStack.classList.add('fade-out');
         setTimeout(() => {
@@ -825,6 +844,7 @@ function initKodaEasterEgg() {
         const lyric = kodaEasterConfig.lyricSequence[index]?.text || '';
         kodaEasterState.currentLyricIndex = index;
         setOverlayMood(index);
+        hitNewLyric(index);
 
         if (!lyric) {
             const remainingDelay = 250 + kodaEasterConfig.lyricHoldGap;
@@ -937,7 +957,8 @@ function initKodaEasterEgg() {
         document.documentElement.classList.add('koda-easter-open');
         document.body.style.overflow = 'hidden';
         endingEl.classList.remove('visible');
-        overlay.classList.remove('blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'impact-shake', 'panic-cut', 'screen-ripple', 'scan-hit', 'phase-grow', 'phase-peak', 'phase-finale');
+        overlay.classList.remove('blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'impact-shake', 'panic-cut', 'screen-ripple', 'scan-hit', 'lyric-hit', 'danger-frame', 'phase-grow', 'phase-peak', 'phase-finale');
+        overlay.style.setProperty('--koda-tension', '0');
         overlay.classList.add('phase-quiet');
         overlay.style.pointerEvents = 'auto';
 
@@ -954,6 +975,7 @@ function initKodaEasterEgg() {
         }
 
         audio.currentTime = 0;
+        showLyric(0);
         const startFirstLyric = () => {
             if (!overlay.classList.contains('is-active') || kodaEasterState.hasStartedPlayback) return;
             kodaEasterState.hasStartedPlayback = true;
@@ -968,7 +990,8 @@ function initKodaEasterEgg() {
     };
 
     const closeOverlay = () => {
-        overlay.classList.remove('is-active', 'phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale', 'blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'impact-shake', 'panic-cut', 'screen-ripple', 'scan-hit');
+        overlay.classList.remove('is-active', 'phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale', 'blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'impact-shake', 'panic-cut', 'screen-ripple', 'scan-hit', 'lyric-hit', 'danger-frame');
+        overlay.style.removeProperty('--koda-tension');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('koda-easter-open');
         document.documentElement.classList.remove('koda-easter-open');

@@ -713,6 +713,16 @@ body {
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.45s ease, visibility 0.45s ease;
+    --koda-tension: 0;
+    --koda-danger-a: 0.12;
+    --koda-blue-a: 0.1;
+    --koda-grain-a: 0.28;
+    --koda-lyric-glow-size: 34px;
+    --koda-lyric-glow-a: 0.24;
+    --koda-red-ghost-a: 0.16;
+    --koda-blue-ghost-a: 0.12;
+    --koda-danger-frame-size: 110px;
+    --koda-danger-frame-a: 0.2;
 }
 
 .koda-easter-overlay.is-active {
@@ -731,6 +741,16 @@ body {
 
 .koda-easter-overlay.scan-hit::after {
     animation: kodaScanHit 0.22s steps(2, end), kodaFilmJitter 0.48s steps(2, end) infinite;
+}
+
+.koda-easter-overlay.lyric-hit::before {
+    filter: brightness(1.28) contrast(1.18);
+}
+
+.koda-easter-overlay.danger-frame {
+    box-shadow:
+        inset 0 0 var(--koda-danger-frame-size) rgba(255, 21, 54, var(--koda-danger-frame-a)),
+        inset 0 0 28px rgba(255, 255, 255, 0.08);
 }
 
 .koda-easter-overlay.impact-shake .koda-easter-shell {
@@ -766,8 +786,8 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     background:
         radial-gradient(ellipse 52% 36% at 50% 48%, rgba(255, 255, 255, 0.1), transparent 44%),
         radial-gradient(ellipse 92% 76% at 50% 52%, transparent 24%, rgba(0, 0, 0, 0.78) 78%),
-        radial-gradient(circle at 12% 18%, rgba(255, 45, 68, 0.16), transparent 24%),
-        radial-gradient(circle at 88% 78%, rgba(75, 185, 255, 0.12), transparent 24%),
+        radial-gradient(circle at 12% 18%, rgba(255, 45, 68, var(--koda-danger-a)), transparent 24%),
+        radial-gradient(circle at 88% 78%, rgba(75, 185, 255, var(--koda-blue-a)), transparent 24%),
         linear-gradient(90deg, rgba(255, 255, 255, 0.045), transparent 12%, transparent 88%, rgba(255, 255, 255, 0.035)),
         linear-gradient(180deg, rgba(88, 0, 18, 0.22), transparent 38%, rgba(2, 6, 14, 0.8));
     pointer-events: none;
@@ -783,7 +803,7 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
         linear-gradient(90deg, rgba(255, 34, 68, 0.05), transparent 16%, transparent 84%, rgba(72, 190, 255, 0.05)),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
     background-size: 100% 5px, 100% 100%, 320px 320px;
-    opacity: 0.38;
+    opacity: var(--koda-grain-a);
     mix-blend-mode: screen;
     pointer-events: none;
     animation: kodaFilmJitter 0.48s steps(2, end) infinite;
@@ -862,9 +882,9 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     filter: blur(0) brightness(1);
     animation: kodaLyricFloat 4.8s ease-in-out infinite alternate, kodaTextFlicker 5.5s steps(1, end) infinite;
     text-shadow: 0 24px 100px rgba(0, 0, 0, 0.82),
-                 0 0 34px rgba(226, 238, 255, 0.28),
-                 2px 0 0 rgba(255, 42, 68, 0.18),
-                 -2px 0 0 rgba(75, 185, 255, 0.13);
+                 0 0 var(--koda-lyric-glow-size) rgba(226, 238, 255, var(--koda-lyric-glow-a)),
+                 2px 0 0 rgba(255, 42, 68, var(--koda-red-ghost-a)),
+                 -2px 0 0 rgba(75, 185, 255, var(--koda-blue-ghost-a));
 }
 
 .koda-easter-lyric-line.typing {
@@ -1248,7 +1268,7 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     --vignette-intensity: 0.55;
     --glow-intensity: 0.15;
     --zoom-level: 1.01;
-    box-shadow: inset 0 0 110px rgba(70, 0, 16, 0.3);
+    box-shadow: inset 0 0 140px rgba(95, 0, 18, 0.36);
 }
 
 .koda-easter-overlay.phase-peak {
@@ -1256,7 +1276,7 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     --vignette-intensity: 0.75;
     --glow-intensity: 0.28;
     --zoom-level: 1.025;
-    box-shadow: inset 0 0 190px rgba(115, 0, 22, 0.42);
+    box-shadow: inset 0 0 230px rgba(150, 0, 28, 0.5);
 }
 
 .koda-easter-overlay.phase-finale {
@@ -1264,7 +1284,7 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     --vignette-intensity: 0.92;
     --glow-intensity: 0.42;
     --zoom-level: 1.04;
-    box-shadow: inset 0 0 240px rgba(130, 0, 24, 0.5);
+    box-shadow: inset 0 0 310px rgba(175, 0, 34, 0.58);
 }
 
 .koda-easter-close {
