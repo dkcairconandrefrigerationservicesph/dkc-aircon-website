@@ -19,20 +19,19 @@ const kodaEasterConfig = {
     ],
     // Path to the audio file used for the hidden Easter egg.
     mediaPath: '/sounds/laufeysoundbg.mp3',
-    // Editable lyric timing array. Each timestamp is the moment the lyric appears.
-    lyricTimings: [
-        { time: 0.0, text: 'I swear to God, I almost drowned' },
-        { time: 4.5, text: 'You asked me how I\'ve been' },
-        { time: 7.6, text: 'But how could I begin?' },
-        { time: 10.4, text: 'To tell you I should\'ve chased you' },
-        { time: 13.8, text: 'I should be who you\'re engaged to' },
-        { time: 18.3, text: 'Lost my fight with fate' },
-        { time: 22.3, text: 'A tug-of-war of leave and stay' },
-        { time: 27.2, text: 'I give in, I abdicate' },
-        { time: 33.1, text: 'I lay my sword down anyway' },
-        { time: 37.6, text: 'I\'ll see you at Heaven\'s gate' },
-        { time: 41.1, text: '\'Cause it\'s too little, way too late' },
-        { time: 46.2, text: '' }
+    // Lyric sequence with durations (in milliseconds) - synchronized to vocals
+    lyricSequence: [
+        { text: "I swear to God, I almost drowned", duration: 4000 },
+        { text: "You asked me how I've been", duration: 5000 },
+        { text: "But how could I begin?", duration: 4000 },
+        { text: "To tell you I should've chased you", duration: 5000 },
+        { text: "I should be who you're engaged to", duration: 4000 },
+        { text: "Lost my fight with fate", duration: 5000 },
+        { text: "A tug-of-war of leave and stay", duration: 4000 },
+        { text: "I give in, I abdicate", duration: 4000 },
+        { text: "I lay my sword down anyway", duration: 5000 },
+        { text: "I'll see you at Heaven's gate", duration: 4000 },
+        { text: "'Cause it's too little, way too late", duration: 6000 }
     ],
     endingQuote: 'Some things are only felt when they’re gone.\nComfort shouldn’t be one of them.',
     endingHeading: 'DKC Airconditioning and Refrigeration Services',
@@ -51,13 +50,22 @@ const kodaEasterConfig = {
         'position-left',
         'position-right'
     ],
-    flashCardHints: [
-        'late reply',
-        'empty text thread',
-        'cold silence',
-        'midnight thought',
-        'missed goodbye',
-        'frozen moment'
+    memoryCards: [
+        'blurred winter street',
+        'empty hallway',
+        'snowfall',
+        'rain on glass',
+        'dark ocean',
+        'moonlight',
+        'cloudy sky',
+        'empty room',
+        'window reflections',
+        'distant city lights',
+        'foggy mirror',
+        'frozen tears',
+        'silent phone',
+        'empty seat',
+        'cold pillow'
     ]
 };
 
@@ -629,31 +637,32 @@ function initKodaEasterEgg() {
     };
 
     const showFlashCard = (index) => {
-        const flashHints = kodaEasterConfig.flashCardHints;
+        const memoryCards = kodaEasterConfig.memoryCards;
         const cards = cardLayer.querySelectorAll('.koda-easter-flash-card');
         if (!cards.length) return;
 
         const card = cards[index % cards.length];
-        const hint = getRandomItem(flashHints);
-        const size = 220 + Math.round(Math.random() * 100);
-        const top = 12 + Math.round(Math.random() * 62);
-        const left = Math.round(Math.random() * 68);
-        const rotation = -8 + Math.round(Math.random() * 16);
-        const hues = ['255,241,229', '219,237,255', '255,214,221'];
+        const memory = getRandomItem(memoryCards);
+        const size = 240 + Math.round(Math.random() * 120);
+        const top = 8 + Math.round(Math.random() * 74);
+        const left = 5 + Math.round(Math.random() * 80);
+        const rotation = -12 + Math.round(Math.random() * 24);
+        const hues = ['255,241,229', '219,237,255', '255,214,221', '240,245,255'];
         const tint = getRandomItem(hues);
 
         card.style.width = `${size}px`;
-        card.style.height = `${size * 0.78}px`;
+        card.style.height = `${size * 0.75}px`;
         card.style.top = `${top}%`;
         card.style.left = `${left}%`;
         card.style.setProperty('--rotate', `${rotation}deg`);
-        card.style.background = `rgba(${tint}, 0.14)`;
-        card.querySelector('span').textContent = hint;
+        card.style.background = `rgba(${tint}, 0.12)`;
+        card.querySelector('span').textContent = memory;
         card.classList.add('visible');
 
+        const flashDuration = 100 + Math.round(Math.random() * 150);
         setTimeout(() => {
             card.classList.remove('visible');
-        }, 1400);
+        }, flashDuration);
     };
 
     const setOverlayMood = (index) => {
@@ -689,7 +698,7 @@ function initKodaEasterEgg() {
 
     const showLyric = (index) => {
         if (kodaEasterState.currentLyricIndex === index) return;
-        const lyric = kodaEasterConfig.lyricTimings[index]?.text || '';
+        const lyric = kodaEasterConfig.lyricSequence[index]?.text || '';
         kodaEasterState.currentLyricIndex = index;
         setOverlayMood(index);
 
@@ -718,14 +727,24 @@ function initKodaEasterEgg() {
         applyTypingEffect(newLine);
         fadeOutOldLines();
 
+        // Enhanced emotional progression with memory cards
         if (isChorus) {
             overlay.classList.add('lyric-surge', 'flash-burst');
             setTimeout(() => overlay.classList.remove('flash-burst'), 240);
             setTimeout(() => overlay.classList.remove('lyric-surge'), 900);
         }
 
-        if (index === 1 || index === 4 || index === 7 || index === 9) {
-            showFlashCard(index);
+        // Memory card flashing throughout the song
+        // More frequent during peak emotional moments
+        if (index >= 3) { // Start after "To tell you I should've chased you"
+            if (Math.random() < (index >= 7 ? 0.7 : 0.45)) {
+                showFlashCard(index);
+            }
+        }
+        
+        // Guaranteed flashes at emotional peaks
+        if (index === 3 || index === 6 || index === 8 || index === 10) {
+            setTimeout(() => showFlashCard(index), 120);
         }
     };
 
@@ -743,12 +762,16 @@ function initKodaEasterEgg() {
     const updateOverlayProgress = () => {
         if (!audio || audio.readyState < 2) return;
         const currentTime = audio.currentTime;
-        const timings = kodaEasterConfig.lyricTimings;
-        for (let index = timings.length - 1; index >= 0; index -= 1) {
-            if (currentTime >= timings[index].time) {
+        const sequence = kodaEasterConfig.lyricSequence;
+        
+        let accumulatedTime = 0;
+        for (let index = 0; index < sequence.length; index += 1) {
+            const lyricDuration = sequence[index].duration;
+            if (currentTime >= accumulatedTime && currentTime < accumulatedTime + lyricDuration) {
                 showLyric(index);
                 break;
             }
+            accumulatedTime += lyricDuration;
         }
     };
 

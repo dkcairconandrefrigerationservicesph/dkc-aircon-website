@@ -706,9 +706,9 @@ body {
     display: grid;
     place-items: center;
     overflow: hidden;
-    background: rgba(6, 12, 20, 0.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(8, 12, 20, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -747,7 +747,10 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 20%, rgba(255, 248, 230, 0.08), transparent 30%), radial-gradient(circle at 50% 80%, rgba(255, 248, 230, 0.04), transparent 20%);
+    background: 
+        radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.3) 70%),
+        radial-gradient(circle at 50% 20%, rgba(255, 248, 230, 0.1), transparent 35%), 
+        radial-gradient(circle at 50% 80%, rgba(255, 248, 230, 0.05), transparent 25%);
     pointer-events: none;
 }
 
@@ -755,9 +758,9 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
-    opacity: 0.18;
-    mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    opacity: 0.22;
+    mix-blend-mode: overlay;
     pointer-events: none;
 }
 
@@ -805,16 +808,21 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     width: min(92vw, 880px);
     max-width: 92vw;
     font-family: 'Cormorant Garamond', 'Georgia', serif;
-    font-size: clamp(2.2rem, 5vw, 5rem);
-    line-height: 1.02;
-    letter-spacing: -0.045em;
-    color: rgba(245, 238, 229, 0.98);
+    font-size: clamp(2.4rem, 6.2vw, 5.2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    color: rgba(250, 245, 238, 0.95);
     text-align: center;
     opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.98);
-    filter: blur(10px);
-    transition: opacity 0.65s ease, transform 0.65s ease, filter 0.65s ease, text-shadow 0.65s ease;
-    text-shadow: 0 28px 100px rgba(0, 0, 0, 0.32);
+    transform: translate3d(0, 28px, 0) scale(0.92);
+    filter: blur(12px);
+    transition: opacity 0.75s cubic-bezier(0.23, 1, 0.32, 1), 
+                transform 0.75s cubic-bezier(0.23, 1, 0.32, 1), 
+                filter 0.75s ease, 
+                text-shadow 0.8s ease;
+    text-shadow: 0 32px 120px rgba(0, 0, 0, 0.4),
+                 0 0 40px rgba(255, 240, 220, 0.08);
     pointer-events: none;
     padding: 0 18px;
     white-space: pre-line;
@@ -824,6 +832,9 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
     filter: blur(0);
+    text-shadow: 0 38px 140px rgba(0, 0, 0, 0.45),
+                 0 0 60px rgba(255, 240, 220, 0.12),
+                 0 0 100px rgba(102, 215, 255, 0.04);
 }
 
 .koda-easter-lyric-line.typing {
@@ -844,16 +855,16 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 }
 
 .koda-easter-lyric-line.past {
-    opacity: 0.14;
-    filter: blur(14px);
-    transform: translate3d(0, -28px, 0) scale(0.92);
-    text-shadow: 0 18px 80px rgba(0, 0, 0, 0.22);
+    opacity: 0.12;
+    filter: blur(18px);
+    transform: translate3d(0, -32px, 0) scale(0.88);
+    text-shadow: 0 20px 80px rgba(0, 0, 0, 0.3);
 }
 
 .koda-easter-lyric-line.remove {
     opacity: 0;
-    filter: blur(16px);
-    transform: translate3d(0, -28px, 0) scale(0.92);
+    filter: blur(20px);
+    transform: translate3d(0, -36px, 0) scale(0.85);
 }
 
 .koda-easter-lyric-line.position-center {
@@ -930,34 +941,40 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     position: absolute;
     display: grid;
     place-items: center;
-    border-radius: 32px;
-    filter: blur(20px) saturate(1.1);
+    border-radius: 28px;
+    filter: blur(28px) saturate(1.15) brightness(0.9);
     opacity: 0;
     mix-blend-mode: screen;
-    transform: scale(0.96) rotate(var(--rotate, 0deg));
-    transition: opacity 0.2s ease, transform 0.2s ease, top 0.3s ease, left 0.3s ease;
+    transform: scale(0.92) rotate(var(--rotate, 0deg));
+    transition: opacity 0.15s ease, transform 0.15s ease, top 0.3s ease, left 0.3s ease;
     pointer-events: none;
-    box-shadow: 0 48px 140px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 52px 160px rgba(255, 240, 220, 0.08);
+    border: 1px solid rgba(255, 240, 220, 0.06);
 }
 
 .koda-easter-flash-card.visible {
     opacity: 1;
-    transform: scale(1.08) translateY(-6px) rotate(var(--rotate, 0deg));
+    transform: scale(1.12) translateY(-8px) rotate(var(--rotate, 0deg));
+    filter: blur(24px) saturate(1.2) brightness(1.05);
 }
 
 .koda-easter-overlay.phase-peak .koda-easter-shell,
 .koda-easter-overlay.lyric-surge .koda-easter-shell {
-    animation: kodaEasterShake 4.4s ease-in-out infinite alternate;
+    animation: kodaEasterCinematicShake 5.2s ease-in-out infinite alternate;
 }
 
 .koda-easter-overlay.phase-finale .koda-easter-shell {
-    transform: scale(1.03);
+    transform: scale(1.06);
+    animation: kodaEasterFinaleZoom 4.8s ease-out infinite alternate;
 }
 
 .koda-easter-lyric-line.chorus {
-    letter-spacing: -0.06em;
-    text-shadow: 0 32px 120px rgba(0, 0, 0, 0.34);
+    letter-spacing: -0.05em;
+    text-shadow: 0 44px 160px rgba(0, 0, 0, 0.5),
+                 0 0 80px rgba(255, 240, 220, 0.16),
+                 0 0 140px rgba(102, 215, 255, 0.06);
     color: rgba(255, 250, 238, 0.98);
+    font-weight: 700;
 }
 
 .koda-easter-overlay.flash-burst::before {
@@ -982,20 +999,35 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     filter: brightness(1.08);
 }
 
-.koda-easter-overlay.phase-quiet .koda-easter-shell {
-    opacity: 1;
+.koda-easter-overlay.phase-quiet {
+    background: rgba(8, 12, 20, 0.72);
+    --vignette-intensity: 0.35;
+    --glow-intensity: 0.08;
+    --zoom-level: 1;
 }
 
-.koda-easter-overlay.phase-grow .koda-easter-shell {
-    transform: scale(1.005);
+.koda-easter-overlay.phase-grow {
+    background: rgba(6, 10, 22, 0.82);
+    --vignette-intensity: 0.55;
+    --glow-intensity: 0.15;
+    --zoom-level: 1.01;
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.3);
 }
 
-.koda-easter-overlay.phase-peak .koda-easter-shell {
-    transform: scale(1.01);
+.koda-easter-overlay.phase-peak {
+    background: rgba(4, 8, 18, 0.88);
+    --vignette-intensity: 0.75;
+    --glow-intensity: 0.28;
+    --zoom-level: 1.025;
+    box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.5);
 }
 
-.koda-easter-overlay.phase-finale .koda-easter-shell {
-    transform: scale(1.0);
+.koda-easter-overlay.phase-finale {
+    background: rgba(2, 4, 12, 0.92);
+    --vignette-intensity: 0.92;
+    --glow-intensity: 0.42;
+    --zoom-level: 1.04;
+    box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.7);
 }
 
 .koda-easter-close {
@@ -1028,10 +1060,11 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 
 .koda-easter-ending {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.65s ease 0.12s, transform 0.65s ease 0.12s;
+    transform: translateY(38px);
+    transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.15s, 
+                transform 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.15s;
     display: grid;
-    gap: 18px;
+    gap: 28px;
     align-items: center;
     justify-items: center;
 }
@@ -1042,34 +1075,42 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 }
 
 .koda-easter-ending-quote {
-    max-width: 720px;
+    max-width: 740px;
     margin: 0 auto;
-    color: rgba(245, 238, 229, 0.94);
-    font-size: clamp(0.98rem, 1.8vw, 1.1rem);
-    line-height: 1.8;
-    letter-spacing: 0.02em;
+    color: rgba(250, 245, 238, 0.96);
+    font-size: clamp(1.05rem, 1.9vw, 1.25rem);
+    line-height: 1.85;
+    letter-spacing: 0.015em;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    text-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .koda-easter-ending h2,
 .koda-easter-ending p {
     margin: 0;
-    color: #fff;
+    color: #faf8f4;
 }
 
 .koda-easter-ending h2 {
-    font-size: clamp(1.7rem, 2.4vw, 2.4rem);
-    letter-spacing: 0.05em;
+    font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+    letter-spacing: 0.04em;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    text-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
 }
 
 .koda-easter-ending p {
-    opacity: 0.9;
-    font-size: 1rem;
+    opacity: 0.92;
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    letter-spacing: 0.03em;
 }
 
 .koda-easter-cta {
-    margin-top: 6px;
-    padding: 0.95rem 2rem;
-    font-size: 1rem;
+    margin-top: 12px;
+    padding: 1.1rem 2.4rem;
+    font-size: 1.05rem;
+    animation: kodaEasterCtaGlow 2.8s ease-in-out infinite;
 }
 
 .koda-easter-overlay.blackout {
@@ -1087,43 +1128,99 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 
 .koda-easter-overlay.phase-grow .koda-easter-shell,
 .koda-easter-overlay.phase-peak .koda-easter-shell {
-    animation-duration: 20s;
-}
-
-.koda-easter-overlay.phase-peak .koda-easter-shell {
-    animation: kodaEasterShake 4.8s ease-in-out infinite alternate;
+    animation: kodaEasterCinematicShake 5.2s ease-in-out infinite alternate;
 }
 
 .koda-easter-overlay.is-active .koda-easter-shell {
-    animation: kodaEasterZoom 24s ease-out infinite alternate;
+    animation: kodaEasterZoom 28s ease-out infinite alternate;
 }
 
 @keyframes kodaEasterZoom {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.02); }
+    0% { 
+        transform: scale(1) translateZ(0);
+        filter: brightness(1);
+    }
+    100% { 
+        transform: scale(1.035) translateZ(0);
+        filter: brightness(1.02);
+    }
 }
 
-@keyframes kodaEasterShake {
-    0% { transform: scale(1.002) translateX(0); }
-    50% { transform: scale(1.006) translateX(1.2px); }
-    100% { transform: scale(1.002) translateX(-1.2px); }
+@keyframes kodaEasterCinematicShake {
+    0% { 
+        transform: scale(1.002) translateX(0) translateY(0);
+        filter: brightness(0.98);
+    }
+    25% { 
+        transform: scale(1.008) translateX(1.4px) translateY(-0.8px);
+        filter: brightness(1.01);
+    }
+    50% { 
+        transform: scale(1.006) translateX(0) translateY(0);
+        filter: brightness(0.99);
+    }
+    75% { 
+        transform: scale(1.008) translateX(-1.4px) translateY(0.8px);
+        filter: brightness(1.01);
+    }
+    100% { 
+        transform: scale(1.002) translateX(0) translateY(0);
+        filter: brightness(0.98);
+    }
+}
+
+@keyframes kodaEasterFinaleZoom {
+    0% { 
+        transform: scale(1.06) translateZ(0);
+        filter: brightness(0.95);
+    }
+    100% { 
+        transform: scale(1.08) translateZ(0);
+        filter: brightness(1.05);
+    }
 }
 
 @keyframes kodaTypingCursor {
-    0%, 100% { opacity: 0.6; }
+    0%, 100% { opacity: 0.7; }
     50% { opacity: 1; }
 }
 
 @keyframes kodaFlashPulse {
-    0% { filter: brightness(1.08); }
-    50% { filter: brightness(1.18) saturate(1.1); }
-    100% { filter: brightness(1.08); }
+    0% { 
+        filter: brightness(1.08) saturate(1);
+    }
+    50% { 
+        filter: brightness(1.22) saturate(1.2);
+    }
+    100% { 
+        filter: brightness(1.08) saturate(1);
+    }
 }
 
 @keyframes kodaFlashGlow {
-    0% { opacity: 0.18; transform: scale(1); }
-    50% { opacity: 0.32; transform: scale(1.03); }
-    100% { opacity: 0.18; transform: scale(1); }
+    0% { 
+        opacity: 0.22;
+        transform: scale(1) translate(0, 0);
+    }
+    50% { 
+        opacity: 0.44;
+        transform: scale(1.04) translate(1px, -1px);
+    }
+    100% { 
+        opacity: 0.22;
+        transform: scale(1) translate(0, 0);
+    }
+}
+
+@keyframes kodaEasterCtaGlow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(77, 199, 255, 0.3),
+                    0 0 40px rgba(77, 199, 255, 0.1);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(77, 199, 255, 0.6),
+                    0 0 60px rgba(77, 199, 255, 0.2);
+    }
 }
 
 body.koda-easter-open,
