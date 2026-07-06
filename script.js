@@ -51,21 +51,21 @@ const kodaEasterConfig = {
         'position-right'
     ],
     memoryCards: [
-        'blurred winter street',
-        'empty hallway',
-        'snowfall',
-        'rain on glass',
-        'dark ocean',
-        'moonlight',
-        'cloudy sky',
-        'empty room',
-        'window reflections',
-        'distant city lights',
-        'foggy mirror',
-        'frozen tears',
-        'silent phone',
-        'empty seat',
-        'cold pillow'
+        'WHY WASN\'T I ENOUGH?',
+        'DON\'T LOOK BACK',
+        'THE ROOM REMEMBERS',
+        'TOO LATE',
+        'SILENCE',
+        'EMPTY HALLWAY',
+        'HEAVEN WAITS',
+        'I STILL HEAR IT',
+        'NO ANSWER',
+        'COLD LIGHT',
+        'FADING',
+        'STAY',
+        'LEAVE',
+        'AFTERIMAGE',
+        'THE DOOR IS OPEN'
     ]
 };
 
@@ -602,10 +602,26 @@ function initKodaEasterEgg() {
 
     const buildLyricLine = (text, positionClass, isChorus = false, index = 0, shouldFlash = false) => {
         const line = document.createElement('div');
-        const schemeClass = shouldFlash ? 'inverted' : 'normal';
+        const invertedPeakLines = new Set([3, 6, 8, 10]);
+        const schemeClass = (index % 2 === 1 || invertedPeakLines.has(index)) ? 'inverted' : 'normal';
         line.className = `koda-easter-lyric-card koda-easter-lyric-line ${positionClass} ${schemeClass}${shouldFlash ? ' flash' : ''}`;
-        const offsetX = Math.min(index * 18, 220);
-        const offsetY = Math.min(index * 10, 120);
+        line.dataset.fullText = text;
+        line.textContent = '';
+
+        const offsetPattern = [
+            [0, 0],
+            [-10, -8],
+            [12, 10],
+            [-18, 16],
+            [18, -14],
+            [-8, 22],
+            [10, -22],
+            [-22, 8],
+            [22, -6],
+            [-12, -18],
+            [0, 0]
+        ];
+        const [offsetX, offsetY] = offsetPattern[index % offsetPattern.length];
         line.style.setProperty('--offset-x', `${offsetX}px`);
         line.style.setProperty('--offset-y', `${offsetY}px`);
         line.style.zIndex = `${100 + index}`;
@@ -648,11 +664,11 @@ function initKodaEasterEgg() {
 
         const card = cards[index % cards.length];
         const memory = getRandomItem(memoryCards);
-        const size = 240 + Math.round(Math.random() * 120);
-        const top = 8 + Math.round(Math.random() * 74);
-        const left = 5 + Math.round(Math.random() * 80);
-        const rotation = -12 + Math.round(Math.random() * 24);
-        const hues = ['255,241,229', '219,237,255', '255,214,221', '240,245,255'];
+        const size = 180 + Math.round(Math.random() * 180);
+        const top = 4 + Math.round(Math.random() * 82);
+        const left = 3 + Math.round(Math.random() * 86);
+        const rotation = -6 + Math.round(Math.random() * 12);
+        const hues = ['255,255,255', '180,211,255', '255,60,76', '210,235,255'];
         const tint = getRandomItem(hues);
 
         card.style.width = `${size}px`;
@@ -660,7 +676,7 @@ function initKodaEasterEgg() {
         card.style.top = `${top}%`;
         card.style.left = `${left}%`;
         card.style.setProperty('--rotate', `${rotation}deg`);
-        card.style.background = `rgba(${tint}, 0.12)`;
+        card.style.background = `linear-gradient(135deg, rgba(${tint}, 0.18), rgba(0, 0, 0, 0.04))`;
         card.querySelector('span').textContent = memory;
         card.classList.add('visible');
 
@@ -672,17 +688,17 @@ function initKodaEasterEgg() {
 
     const setOverlayMood = (index) => {
         overlay.classList.remove('phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale');
-        if (index >= 10) {
+        if (index >= 9) {
             overlay.classList.add('phase-finale');
-        } else if (index >= 7) {
+        } else if (index >= 6) {
             overlay.classList.add('phase-peak');
-        } else if (index >= 4) {
+        } else if (index >= 3) {
             overlay.classList.add('phase-grow');
         } else {
             overlay.classList.add('phase-quiet');
         }
 
-        overlay.classList.toggle('beat-cut', index === 4 || index === 7 || index === 9);
+        overlay.classList.toggle('beat-cut', index === 3 || index === 6 || index === 8 || index === 10);
     };
 
     const fadeOutOldLines = () => {
@@ -776,7 +792,7 @@ function initKodaEasterEgg() {
         
         let accumulatedTime = 0;
         for (let index = 0; index < sequence.length; index += 1) {
-            const lyricDurationSeconds = sequence[index].duration / 1000; // Convert ms to seconds
+            const lyricDurationSeconds = sequence[index].duration;
             if (currentTime >= accumulatedTime && currentTime < accumulatedTime + lyricDurationSeconds) {
                 showLyric(index);
                 break;
