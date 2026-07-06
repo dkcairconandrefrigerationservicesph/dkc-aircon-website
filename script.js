@@ -19,19 +19,19 @@ const kodaEasterConfig = {
     ],
     // Path to the audio file used for the hidden Easter egg.
     mediaPath: '/sounds/laufeysoundbg.mp3',
-    // Lyric sequence with durations (in milliseconds) - synchronized to vocals
+    // Lyric sequence with durations (in seconds) - synchronized to vocals
     lyricSequence: [
-        { text: "I swear to God, I almost drowned", duration: 4000 },
-        { text: "You asked me how I've been", duration: 5000 },
-        { text: "But how could I begin?", duration: 4000 },
-        { text: "To tell you I should've chased you", duration: 5000 },
-        { text: "I should be who you're engaged to", duration: 4000 },
-        { text: "Lost my fight with fate", duration: 5000 },
-        { text: "A tug-of-war of leave and stay", duration: 4000 },
-        { text: "I give in, I abdicate", duration: 4000 },
-        { text: "I lay my sword down anyway", duration: 5000 },
-        { text: "I'll see you at Heaven's gate", duration: 4000 },
-        { text: "'Cause it's too little, way too late", duration: 6000 }
+        { text: "I swear to God, I almost drowned", duration: 4 },
+        { text: "You asked me how I've been", duration: 5 },
+        { text: "But how could I begin?", duration: 4 },
+        { text: "To tell you I should've chased you", duration: 5 },
+        { text: "I should be who you're engaged to", duration: 4 },
+        { text: "Lost my fight with fate", duration: 5 },
+        { text: "A tug-of-war of leave and stay", duration: 4 },
+        { text: "I give in, I abdicate", duration: 4 },
+        { text: "I lay my sword down anyway", duration: 5 },
+        { text: "I'll see you at Heaven's gate", duration: 4 },
+        { text: "'Cause it's too little, way too late", duration: 6 }
     ],
     endingQuote: 'Some things are only felt when they’re gone.\nComfort shouldn’t be one of them.',
     endingHeading: 'DKC Airconditioning and Refrigeration Services',
@@ -600,41 +600,46 @@ function initKodaEasterEgg() {
         return card;
     };
 
-    const buildLyricLine = (text, positionClass, isChorus = false) => {
+    const buildLyricLine = (text, positionClass, isChorus = false, index = 0, shouldFlash = false) => {
         const line = document.createElement('div');
-        line.className = `koda-easter-lyric-line ${positionClass}${isChorus ? ' chorus' : ''}`;
-        line.dataset.fullText = text;
-        line.textContent = '';
+        const schemeClass = shouldFlash ? 'inverted' : 'normal';
+        line.className = `koda-easter-lyric-card koda-easter-lyric-line ${positionClass} ${schemeClass}${shouldFlash ? ' flash' : ''}`;
+        const offsetX = Math.min(index * 18, 220);
+        const offsetY = Math.min(index * 10, 120);
+        line.style.setProperty('--offset-x', `${offsetX}px`);
+        line.style.setProperty('--offset-y', `${offsetY}px`);
+        line.style.zIndex = `${100 + index}`;
         return line;
     };
 
-    const applyTypingEffect = (line) => {
-        const text = line.dataset.fullText || '';
+    const applyTypingEffect = (element, overrideText) => {
+        const text = overrideText ?? element.dataset.fullText ?? '';
         const length = Math.max(0, text.length);
         const speed = Math.max(20, kodaEasterConfig.typingSpeed - Math.min(18, Math.floor(length / 2)));
         let index = 0;
 
-        line.classList.add('typing');
-        if (line._typingInterval) {
-            clearInterval(line._typingInterval);
+        element.classList.add('typing');
+        if (element._typingInterval) {
+            clearInterval(element._typingInterval);
         }
 
-        line._typingInterval = setInterval(() => {
+        element._typingInterval = setInterval(() => {
             if (index >= length) {
-                clearInterval(line._typingInterval);
-                line._typingInterval = null;
-                line.classList.remove('typing');
-                line.classList.add('typed');
+                clearInterval(element._typingInterval);
+                element._typingInterval = null;
+                element.classList.remove('typing');
+                element.classList.add('typed');
+                if (typeof element._typingComplete === 'function') {
+                    element._typingComplete();
+                    element._typingComplete = null;
+                }
                 return;
             }
-            line.textContent += text[index++];
+            element.textContent += text[index++];
         }, speed);
     };
 
-    const getPositionClass = (index) => {
-        const positions = kodaEasterConfig.lyricPositions;
-        return positions[index % positions.length];
-    };
+    const getPositionClass = () => 'position-stack';
 
     const showFlashCard = (index) => {
         const memoryCards = kodaEasterConfig.memoryCards;
@@ -681,19 +686,7 @@ function initKodaEasterEgg() {
     };
 
     const fadeOutOldLines = () => {
-        const lines = lyricStack.querySelectorAll('.koda-easter-lyric-line');
-        if (lines.length <= 5) return;
-        const [first] = lines;
-        if (first._typingInterval) {
-            clearInterval(first._typingInterval);
-            first._typingInterval = null;
-        }
-        first.classList.add('remove');
-        setTimeout(() => {
-            if (first.parentElement) {
-                first.parentElement.removeChild(first);
-            }
-        }, kodaEasterConfig.lyricFadeDuration + 120);
+        // Previous cards stay visible as a layered emotional stack.
     };
 
     const showLyric = (index) => {
@@ -712,20 +705,24 @@ function initKodaEasterEgg() {
 
         const positionClass = getPositionClass(index);
         const isChorus = index >= 7;
-        const newLine = buildLyricLine(lyric, positionClass, isChorus);
+        const invertedPeakLines = new Set([3, 6, 8, 10]);
+        const shouldFlash = invertedPeakLines.has(index) || isChorus;
+        const newLine = buildLyricLine(lyric, positionClass, isChorus, index, shouldFlash);
         lyricStack.appendChild(newLine);
 
         requestAnimationFrame(() => {
-            const previousLines = lyricStack.querySelectorAll('.koda-easter-lyric-line.visible');
+            const previousLines = lyricStack.querySelectorAll('.koda-easter-lyric-card.visible');
             previousLines.forEach(line => {
                 line.classList.remove('visible');
                 line.classList.add('past');
             });
             newLine.classList.add('visible');
+            if (shouldFlash) {
+                setTimeout(() => newLine.classList.remove('flash'), 420);
+            }
         });
 
         applyTypingEffect(newLine);
-        fadeOutOldLines();
 
         // Enhanced emotional progression with memory cards
         if (isChorus) {
@@ -753,10 +750,23 @@ function initKodaEasterEgg() {
         kodaEasterState.hasStartedEnding = true;
 
         overlay.classList.add('blackout');
+        lyricStack.classList.add('fade-out');
         kodaEasterState.blackoutTimeoutId = setTimeout(() => {
             endingEl.classList.add('visible');
             audio.pause();
-        }, 800);
+            endingQuote.textContent = '';
+            endingQuote.classList.remove('typed', 'typing');
+            endingHeading.classList.remove('show');
+            endingSubheading.classList.remove('show');
+            endingCta.classList.remove('show');
+
+            endingQuote._typingComplete = () => {
+                endingHeading.classList.add('show');
+                setTimeout(() => endingSubheading.classList.add('show'), 220);
+                setTimeout(() => endingCta.classList.add('show'), 520);
+            };
+            applyTypingEffect(endingQuote, kodaEasterConfig.endingQuote);
+        }, 750);
     };
 
     const updateOverlayProgress = () => {
@@ -789,6 +799,14 @@ function initKodaEasterEgg() {
         overlay.classList.remove('blackout');
         overlay.classList.add('phase-quiet');
         overlay.style.pointerEvents = 'auto';
+
+        lyricStack.classList.remove('fade-out');
+        endingEl.classList.remove('visible');
+        endingHeading.classList.remove('show');
+        endingSubheading.classList.remove('show');
+        endingCta.classList.remove('show');
+        endingQuote.textContent = '';
+        endingQuote.classList.remove('typing', 'typed');
 
         for (let i = 0; i < 4; i += 1) {
             createFlashCard();

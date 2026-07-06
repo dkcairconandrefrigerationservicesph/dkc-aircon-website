@@ -937,6 +937,128 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     text-align: right;
 }
 
+.koda-easter-lyric-card {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: min(92vw, 820px);
+    max-width: 92vw;
+    padding: 30px 26px;
+    border-radius: 28px;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: clamp(2.2rem, 5.8vw, 4.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    text-align: center;
+    white-space: pre-line;
+    opacity: 0;
+    filter: blur(16px);
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.28);
+    border: 1px solid transparent;
+    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y))) scale(0.94);
+    transition: opacity 0.36s ease, transform 0.36s ease, filter 0.36s ease, background-color 0.24s ease, color 0.24s ease, border-color 0.24s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.koda-easter-lyric-card.position-stack {
+    top: 50%;
+    left: 50%;
+}
+
+.koda-easter-lyric-card.normal {
+    --card-bg: rgba(250, 245, 238, 0.96);
+    --card-color: rgba(16, 24, 34, 0.98);
+    --card-border: rgba(16, 24, 34, 0.08);
+    --card-shadow: 0 40px 120px rgba(0, 0, 0, 0.18);
+}
+
+.koda-easter-lyric-card.inverted {
+    --card-bg: rgba(12, 16, 24, 0.96);
+    --card-color: rgba(248, 242, 228, 0.96);
+    --card-border: rgba(255, 255, 255, 0.12);
+    --card-shadow: 0 40px 120px rgba(0, 0, 0, 0.42);
+}
+
+.koda-easter-lyric-card {
+    background: var(--card-bg);
+    color: var(--card-color);
+    border-color: var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.koda-easter-lyric-card.visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y))) scale(1);
+}
+
+.koda-easter-lyric-card.past {
+    opacity: 0.2;
+    filter: blur(18px);
+    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y))) scale(0.9);
+}
+
+.koda-easter-lyric-card.flash {
+    animation: kodaEasterCardFlash 0.42s ease-out both;
+}
+
+.koda-easter-lyric-stack.fade-out .koda-easter-lyric-card {
+    opacity: 0.06;
+    filter: blur(18px);
+    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y))) scale(0.92);
+}
+
+@keyframes kodaEasterCardFlash {
+    0% {
+        background: rgba(248, 242, 228, 0.96);
+        color: rgba(16, 24, 34, 0.98);
+        border-color: rgba(16, 24, 34, 0.14);
+    }
+    20% {
+        background: rgba(12, 16, 24, 0.98);
+        color: rgba(248, 242, 228, 0.98);
+        border-color: rgba(255, 255, 255, 0.22);
+    }
+    50% {
+        background: rgba(248, 242, 228, 0.96);
+        color: rgba(16, 24, 34, 0.98);
+    }
+    75% {
+        background: rgba(12, 16, 24, 0.98);
+        color: rgba(248, 242, 228, 0.98);
+    }
+    100% {
+        background: var(--card-bg);
+        color: var(--card-color);
+        border-color: var(--card-border);
+    }
+}
+
+.koda-easter-ending h2,
+.koda-easter-ending p,
+.koda-easter-ending .koda-easter-cta {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.koda-easter-ending h2.show,
+.koda-easter-ending p.show,
+.koda-easter-ending .koda-easter-cta.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.koda-easter-ending-quote.typing {
+    opacity: 1;
+}
+
+.koda-easter-ending-quote.typed {
+    opacity: 1;
+}
+
 .koda-easter-flash-card {
     position: absolute;
     display: grid;
