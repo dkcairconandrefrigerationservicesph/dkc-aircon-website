@@ -725,6 +725,14 @@ body {
     animation: kodaFlashPulse 0.34s steps(2, end);
 }
 
+.koda-easter-overlay.impact-shake .koda-easter-shell {
+    animation: kodaImpactShake 0.34s steps(2, end);
+}
+
+.koda-easter-overlay.panic-cut {
+    animation: kodaPanicCut 0.42s steps(2, end);
+}
+
 .koda-easter-overlay.lyric-surge {
     background: rgba(3, 5, 11, 0.94);
     box-shadow: inset 0 0 180px rgba(130, 0, 18, 0.26);
@@ -888,6 +896,14 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     max-width: 100%;
     text-align: center;
     white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.koda-easter-lyric-line.karaoke .karaoke-word {
+    display: inline-block;
+    white-space: nowrap;
+    word-break: keep-all;
 }
 
 .koda-easter-lyric-line.karaoke .karaoke-char {
@@ -1084,9 +1100,10 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 }
 
 .koda-easter-lyric-stack.fade-out .koda-easter-lyric-card {
-    opacity: 0.06;
-    filter: blur(18px);
-    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y))) scale(0.92);
+    opacity: 0;
+    filter: blur(26px) brightness(0.42);
+    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y) - 30px)) scale(0.9);
+    transition: opacity 1.1s ease, transform 1.1s ease, filter 1.1s ease;
 }
 
 @keyframes kodaEasterCardFlash {
@@ -1166,6 +1183,10 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 .koda-easter-overlay.phase-finale .koda-easter-shell {
     transform: scale(1.06);
     animation: kodaEasterFinaleZoom 4.8s ease-out infinite alternate;
+}
+
+.koda-easter-overlay.impact-shake .koda-easter-shell {
+    animation: kodaImpactShake 0.34s steps(2, end);
 }
 
 .koda-easter-lyric-line.chorus {
@@ -1490,6 +1511,43 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
     }
     100% { 
         filter: brightness(1.08) saturate(1);
+    }
+}
+
+@keyframes kodaImpactShake {
+    0% {
+        transform: scale(1.03) translate(0, 0) rotate(0deg);
+        filter: brightness(1.1) contrast(1.1);
+    }
+    20% {
+        transform: scale(1.055) translate(-8px, 5px) rotate(-0.35deg);
+        filter: brightness(1.35) contrast(1.3);
+    }
+    40% {
+        transform: scale(1.045) translate(7px, -4px) rotate(0.32deg);
+    }
+    60% {
+        transform: scale(1.06) translate(-4px, -3px) rotate(-0.2deg);
+        filter: brightness(0.88) contrast(1.45);
+    }
+    100% {
+        transform: scale(1.03) translate(0, 0) rotate(0deg);
+        filter: brightness(1) contrast(1);
+    }
+}
+
+@keyframes kodaPanicCut {
+    0%, 100% {
+        filter: brightness(1.1) contrast(1.2) saturate(0.7);
+    }
+    25% {
+        filter: invert(0.08) brightness(1.65) contrast(1.8) saturate(0.25);
+    }
+    50% {
+        filter: brightness(0.6) contrast(1.9) saturate(1.25);
+    }
+    75% {
+        filter: invert(0.14) brightness(1.35) contrast(1.55) saturate(0.45);
     }
 }
 

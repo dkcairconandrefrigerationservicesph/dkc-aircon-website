@@ -73,6 +73,7 @@ let kodaEasterState = {
     isActive: false,
     currentLyricIndex: -1,
     hasStartedEnding: false,
+    hasFinishedLyrics: false,
     endTimeoutId: null,
     blackoutTimeoutId: null,
     resetTimeoutId: null,
@@ -551,6 +552,7 @@ function isKodaEasterTrigger(message) {
 function resetKodaEasterState() {
     kodaEasterState.currentLyricIndex = -1;
     kodaEasterState.hasStartedEnding = false;
+    kodaEasterState.hasFinishedLyrics = false;
     clearTimeout(kodaEasterState.endTimeoutId);
     clearTimeout(kodaEasterState.blackoutTimeoutId);
     clearTimeout(kodaEasterState.resetTimeoutId);
@@ -641,10 +643,11 @@ function initKodaEasterEgg() {
 
     const applyKaraokeEffect = (element, durationSeconds = 4, index = 0) => {
         const text = element.dataset.fullText || '';
-        const characters = Array.from(text);
+        const wordTokens = text.split(/(\s+)/);
         const revealSeconds = Math.max(1.6, durationSeconds * 0.88);
-        const charCount = Math.max(1, characters.length);
+        const charCount = Math.max(1, Array.from(text.replace(/\s+/g, '')).length);
         const fragment = document.createDocumentFragment();
+        let karaokeIndex = 0;
 
         element.classList.add('karaoke');
         element.style.setProperty('--karaoke-duration', `${revealSeconds}s`);
@@ -653,14 +656,26 @@ function initKodaEasterEgg() {
         const lineWrap = document.createElement('span');
         lineWrap.className = 'karaoke-line';
 
-        characters.forEach((character, charIndex) => {
-            const span = document.createElement('span');
-            span.className = character === ' ' ? 'karaoke-char karaoke-space' : 'karaoke-char';
-            span.textContent = character === ' ' ? '\u00a0' : character;
-            span.style.setProperty('--char-index', charIndex);
-            span.style.animationDelay = `${(revealSeconds * charIndex) / charCount}s`;
-            span.style.animationDuration = `${index >= 6 ? 0.42 : 0.34}s`;
-            lineWrap.appendChild(span);
+        wordTokens.forEach((token) => {
+            if (!token) return;
+            if (/^\s+$/.test(token)) {
+                lineWrap.appendChild(document.createTextNode(' '));
+                return;
+            }
+
+            const wordWrap = document.createElement('span');
+            wordWrap.className = 'karaoke-word';
+            Array.from(token).forEach((character) => {
+                const span = document.createElement('span');
+                span.className = 'karaoke-char';
+                span.textContent = character;
+                span.style.setProperty('--char-index', karaokeIndex);
+                span.style.animationDelay = `${(revealSeconds * karaokeIndex) / charCount}s`;
+                span.style.animationDuration = `${index >= 6 ? 0.42 : 0.34}s`;
+                wordWrap.appendChild(span);
+                karaokeIndex += 1;
+            });
+            lineWrap.appendChild(wordWrap);
         });
 
         fragment.appendChild(lineWrap);
@@ -749,9 +764,12 @@ function initKodaEasterEgg() {
         return timeoutId;
     };
 
-    const pulseOverlay = (duration = 260) => {
-        overlay.classList.add('flash-burst');
-        queueEffectTimeout(() => overlay.classList.remove('flash-burst'), duration);
+    const pulseOverlay = (duration = 260, intense = false) => {
+        overlay.classList.add('flash-burst', 'impact-shake');
+        if (intense) {
+            overlay.classList.add('panic-cut');
+        }
+        queueEffectTimeout(() => overlay.classList.remove('flash-burst', 'impact-shake', 'panic-cut'), duration);
     };
 
     const scheduleEffectBursts = (index, durationSeconds) => {
@@ -769,7 +787,7 @@ function initKodaEasterEgg() {
                 if (!overlay.classList.contains('is-active')) return;
                 showFlashCard(index + burstIndex);
                 if (index >= 6 || burstIndex === burstCount - 1) {
-                    pulseOverlay(index >= 9 ? 360 : 260);
+                    pulseOverlay(index >= 9 ? 420 : 300, index >= 6);
                 }
                 if (index >= 8) {
                     overlay.classList.add('lyric-surge');
@@ -781,6 +799,21 @@ function initKodaEasterEgg() {
 
     const fadeOutOldLines = () => {
         // Previous cards stay visible as a layered emotional stack.
+    };
+
+    const finishLyricSequence = () => {
+        if (kodaEasterState.hasFinishedLyrics) return;
+        kodaEasterState.hasFinishedLyrics = true;
+        kodaEasterState.currentLyricIndex = kodaEasterConfig.lyricSequence.length;
+        kodaEasterState.effectTimeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+        kodaEasterState.effectTimeoutIds = [];
+        overlay.classList.remove('flash-burst', 'lyric-surge', 'beat-cut', 'impact-shake', 'panic-cut');
+        overlay.classList.add('phase-finale');
+        lyricStack.classList.add('fade-out');
+        setTimeout(() => {
+            if (!overlay.classList.contains('is-active') || kodaEasterState.hasStartedEnding) return;
+            lyricStack.innerHTML = '';
+        }, 1300);
     };
 
     const showLyric = (index) => {
@@ -849,7 +882,6 @@ function initKodaEasterEgg() {
         lyricStack.classList.add('fade-out');
         kodaEasterState.blackoutTimeoutId = setTimeout(() => {
             endingEl.classList.add('visible');
-            audio.pause();
             endingQuote.textContent = '';
             endingQuote.classList.remove('typed', 'typing');
             endingHeading.classList.remove('show');
@@ -879,6 +911,10 @@ function initKodaEasterEgg() {
             }
             accumulatedTime += lyricDurationSeconds;
         }
+
+        if (currentTime >= accumulatedTime) {
+            finishLyricSequence();
+        }
     };
 
     const openOverlay = () => {
@@ -892,7 +928,7 @@ function initKodaEasterEgg() {
         document.documentElement.classList.add('koda-easter-open');
         document.body.style.overflow = 'hidden';
         endingEl.classList.remove('visible');
-        overlay.classList.remove('blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'phase-grow', 'phase-peak', 'phase-finale');
+        overlay.classList.remove('blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'impact-shake', 'panic-cut', 'phase-grow', 'phase-peak', 'phase-finale');
         overlay.classList.add('phase-quiet');
         overlay.style.pointerEvents = 'auto';
 
@@ -914,7 +950,7 @@ function initKodaEasterEgg() {
     };
 
     const closeOverlay = () => {
-        overlay.classList.remove('is-active', 'phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale', 'blackout', 'beat-cut', 'flash-burst', 'lyric-surge');
+        overlay.classList.remove('is-active', 'phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale', 'blackout', 'beat-cut', 'flash-burst', 'lyric-surge', 'impact-shake', 'panic-cut');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('koda-easter-open');
         document.documentElement.classList.remove('koda-easter-open');
