@@ -697,6 +697,233 @@ body {
     display: none !important;
 }
 
+.koda-easter-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 999999;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(6, 12, 20, 0.96), rgba(1, 4, 10, 0.98));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.koda-easter-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.koda-easter-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 20%, rgba(255, 248, 230, 0.08), transparent 30%), radial-gradient(circle at 50% 80%, rgba(255, 248, 230, 0.04), transparent 20%);
+    pointer-events: none;
+}
+
+.koda-easter-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+    opacity: 0.18;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.koda-easter-shell {
+    position: relative;
+    width: 100%;
+    max-width: 980px;
+    padding: 18px 16px 28px;
+    display: grid;
+    gap: 16px;
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+    z-index: 1;
+}
+
+.koda-easter-stage {
+    width: min(100%, 92vw);
+    min-height: 200px;
+    display: grid;
+    place-items: center;
+    padding: 0 10px;
+}
+
+.koda-easter-lyric {
+    max-width: 92vw;
+    margin: 0 auto;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: #f5eee1;
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    filter: blur(8px);
+    transition: opacity 0.55s ease, transform 0.55s ease, filter 0.55s ease, text-shadow 0.55s ease;
+    text-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
+    padding: 0 14px;
+    white-space: pre-line;
+}
+
+.koda-easter-lyric.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+.koda-easter-overlay.phase-quiet .koda-easter-lyric {
+    text-shadow: 0 14px 34px rgba(0, 0, 0, 0.23);
+}
+
+.koda-easter-overlay.phase-grow .koda-easter-lyric {
+    text-shadow: 0 22px 52px rgba(0, 0, 0, 0.32);
+}
+
+.koda-easter-overlay.phase-peak .koda-easter-lyric {
+    text-shadow: 0 30px 72px rgba(0, 0, 0, 0.42);
+}
+
+.koda-easter-overlay.phase-finale .koda-easter-lyric {
+    text-shadow: 0 26px 64px rgba(0, 0, 0, 0.45);
+}
+
+.koda-easter-close {
+    position: absolute;
+    top: env(safe-area-inset-top, 18px);
+    right: env(safe-area-inset-right, 18px);
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(8, 14, 22, 0.82);
+    color: #f6f0e8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.25s ease, background 0.25s ease;
+    z-index: 5;
+}
+
+.koda-easter-close:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.92);
+    outline-offset: 2px;
+}
+
+.koda-easter-close:hover {
+    transform: scale(1.05);
+    background: rgba(14, 20, 32, 0.88);
+}
+
+.koda-easter-ending {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s ease 0.12s, transform 0.65s ease 0.12s;
+    display: grid;
+    gap: 18px;
+    align-items: center;
+    justify-items: center;
+}
+
+.koda-easter-ending.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.koda-easter-ending-quote {
+    max-width: 720px;
+    margin: 0 auto;
+    color: rgba(245, 238, 229, 0.94);
+    font-size: clamp(0.98rem, 1.8vw, 1.1rem);
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+}
+
+.koda-easter-ending h2,
+.koda-easter-ending p {
+    margin: 0;
+    color: #fff;
+}
+
+.koda-easter-ending h2 {
+    font-size: clamp(1.7rem, 2.4vw, 2.4rem);
+    letter-spacing: 0.05em;
+}
+
+.koda-easter-ending p {
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.koda-easter-cta {
+    margin-top: 6px;
+    padding: 0.95rem 2rem;
+    font-size: 1rem;
+}
+
+.koda-easter-overlay.blackout {
+    background: #020306;
+}
+
+.koda-easter-overlay.blackout::before,
+.koda-easter-overlay.blackout::after {
+    opacity: 0;
+}
+
+.koda-easter-shell {
+    animation: kodaEasterZoom 24s ease-out infinite alternate;
+}
+
+.koda-easter-overlay.phase-grow .koda-easter-shell,
+.koda-easter-overlay.phase-peak .koda-easter-shell {
+    animation-duration: 20s;
+}
+
+.koda-easter-overlay.phase-peak .koda-easter-shell {
+    animation: kodaEasterShake 4.8s ease-in-out infinite alternate;
+}
+
+.koda-easter-overlay.is-active .koda-easter-shell {
+    animation: kodaEasterZoom 24s ease-out infinite alternate;
+}
+
+@keyframes kodaEasterZoom {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.02); }
+}
+
+@keyframes kodaEasterShake {
+    0% { transform: scale(1.002) translateX(0); }
+    50% { transform: scale(1.003) translateX(0.6px); }
+    100% { transform: scale(1.002) translateX(-0.6px); }
+}
+
+body.koda-easter-open,
+html.koda-easter-open {
+    overflow: hidden !important;
+    touch-action: none !important;
+    height: 100%;
+}
+
+#koda-easter-audio {
+    display: none;
+}
+
+@keyframes chillPulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
 .hero {
     min-height: 100vh;
     display: grid;

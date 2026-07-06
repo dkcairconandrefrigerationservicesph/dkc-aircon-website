@@ -49,9 +49,26 @@
         <span></span><span></span><span></span>
     </div>
 
+    <div id="koda-easter-overlay" class="koda-easter-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="koda-easter-mask"></div>
+        <div class="koda-easter-shell">
+            <button class="koda-easter-close" type="button" aria-label="Close the emotional scene">×</button>
+            <div class="koda-easter-stage">
+                <div id="koda-easter-lyric" class="koda-easter-lyric" aria-live="polite"></div>
+            </div>
+            <div id="koda-easter-ending" class="koda-easter-ending" aria-hidden="true">
+                <p id="koda-easter-ending-quote" class="koda-easter-ending-quote"></p>
+                <h2 id="koda-easter-ending-heading"></h2>
+                <p id="koda-easter-ending-subheading"></p>
+                <a href="#contact" id="koda-easter-ending-cta" class="btn btn-primary koda-easter-cta"></a>
+            </div>
+        </div>
+        <video id="koda-easter-audio" src="/laufeysoundbg.mp4" preload="auto" playsinline></video>
+    </div>
+
     <header class="navbar">
         <div class="nav-container">
-            <a href="#home" class="nav-brand">
+            <a href="#home" class="nav-brand" id="secret-trigger">
                 <img src="images/DKCLOGO.png" alt="DKC Logo" class="nav-logo">
                 <div class="nav-brand-copy">
                     <span class="nav-title">DKC Airconditioning and Refrigeration Services</span>
