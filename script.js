@@ -766,12 +766,12 @@ function initKodaEasterEgg() {
         
         let accumulatedTime = 0;
         for (let index = 0; index < sequence.length; index += 1) {
-            const lyricDuration = sequence[index].duration;
-            if (currentTime >= accumulatedTime && currentTime < accumulatedTime + lyricDuration) {
+            const lyricDurationSeconds = sequence[index].duration / 1000; // Convert ms to seconds
+            if (currentTime >= accumulatedTime && currentTime < accumulatedTime + lyricDurationSeconds) {
                 showLyric(index);
                 break;
             }
-            accumulatedTime += lyricDuration;
+            accumulatedTime += lyricDurationSeconds;
         }
     };
 
