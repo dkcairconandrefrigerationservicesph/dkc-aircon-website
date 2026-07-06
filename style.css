@@ -713,6 +713,20 @@ body {
     height: 100%;
     object-fit: cover;
     z-index: -1;
+    background: linear-gradient(135deg, rgba(7, 18, 34, 0.9), rgba(3, 12, 24, 0.95));
+}
+
+.hero-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+        linear-gradient(135deg, rgba(4, 13, 29, 0.95), rgba(7, 31, 60, 0.85)),
+        radial-gradient(circle at 20% 20%, rgba(125, 220, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 80% 80%, rgba(77, 199, 255, 0.16), transparent 30%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
 .hero-overlay {
@@ -754,9 +768,15 @@ body {
 
 .hero-content {
     position: relative;
-    z-index: 5;
+    z-index: 6;
     text-align: center;
     max-width: 820px;
+    padding: 24px 24px 32px;
+    border-radius: 32px;
+    background: rgba(3, 12, 24, 0.44);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
     opacity: 1;
     visibility: visible;
 }
@@ -2206,16 +2226,7 @@ section {
         color: #eafcff;
         font-weight: 600;
         line-height: 1.5;
-    }
-
-    .contact-form-message a {
-        color: #a9f2ff;
-        text-decoration: underline;
-    }
-
-    .contact-form-message.error {
-        border-color: rgba(255, 118, 118, 0.4);
-        background: rgba(255, 118, 118, 0.12);
+    margin-top: 8px;
         color: #ffe3e3;
     }
 
@@ -2254,17 +2265,18 @@ section {
         transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
-    .contact-form input:focus,
-    .contact-form textarea:focus,
-    .contact-form select:focus {
-        border-color: rgba(77, 199, 255, 0.7);
-        box-shadow: 0 0 0 3px rgba(77, 199, 255, 0.12);
-    }
+.contact-form input.is-invalid,
+.contact-form textarea.is-invalid,
+.contact-form select.is-invalid {
+    border-color: rgba(255, 118, 118, 0.72);
+    box-shadow: 0 0 0 3px rgba(255, 118, 118, 0.16);
+}
 
-    .contact-form textarea {
-        resize: vertical;
-        min-height: 132px;
-    }
+.contact-form .field-error {
+    font-size: 0.82rem;
+    color: #ffb4b4;
+    margin-top: 4px;
+}
 
     .btn-ghost {
         background: rgba(255, 255, 255, 0.06);
@@ -2768,6 +2780,10 @@ section {
         height: 70px;
     }
 
+    .hero-content {
+        padding: 20px 18px 24px;
+    }
+
     body {
         padding-top: 70px;
     }
@@ -2921,6 +2937,15 @@ section {
 @media (max-width: 480px) {
     section {
         padding: 48px 16px;
+    }
+
+    .hero-content {
+        padding: 18px 14px 22px;
+        border-radius: 24px;
+    }
+
+    .about-features {
+        grid-template-columns: 1fr;
     }
 
     .nav-container {
@@ -3460,7 +3485,7 @@ section {
         right: auto;
         bottom: 12px;
         width: auto;
-        max-width: calc(100vw - 94px);
+        max-width: calc(100vw - 110px);
         min-height: 58px;
         padding: 0 18px;
         align-items: center;

@@ -276,11 +276,38 @@ heroMist.forEach((bubble, index) => {
 
 function initVideo() {
     const heroVideo = document.querySelector('.hero-video');
-    if (heroVideo) {
-        heroVideo.play().catch(() => {
-            // Autoplay blocked, user interaction needed
-        });
+    const heroFallback = document.querySelector('.hero-fallback');
+    if (!heroVideo) return;
+
+    const showFallback = () => {
+        if (heroFallback) heroFallback.style.opacity = '1';
+        heroVideo.style.opacity = '0.18';
+    };
+
+    const hideFallback = () => {
+        if (heroFallback) heroFallback.style.opacity = '0';
+        heroVideo.style.opacity = '1';
+    };
+
+    heroVideo.addEventListener('error', showFallback, { once: true });
+    heroVideo.addEventListener('canplaythrough', hideFallback, { once: true });
+    heroVideo.addEventListener('playing', hideFallback, { once: true });
+
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection && (connection.saveData || ['slow-2g', '2g'].includes(connection.effectiveType))) {
+        showFallback();
+        return;
     }
+
+    window.setTimeout(() => {
+        if (!heroVideo.dataset.ready) {
+            showFallback();
+        }
+    }, 1800);
+
+    heroVideo.play().catch(() => {
+        showFallback();
+    });
 }
 
 function initContactForm() {
@@ -299,6 +326,71 @@ function initContactForm() {
         formMessage.classList.add(type);
         formMessage.style.display = 'block';
         formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    const clearErrors = () => {
+        contactForm?.querySelectorAll('.is-invalid').forEach(field => field.classList.remove('is-invalid'));
+        contactForm?.querySelectorAll('.field-error').forEach(error => error.remove());
+    };
+
+    const setFieldError = (field, message) => {
+        if (!field) return;
+        field.classList.add('is-invalid');
+        const wrapper = field.closest('label');
+        let error = wrapper?.querySelector('.field-error');
+        if (!error && wrapper) {
+            error = document.createElement('div');
+            error.className = 'field-error';
+            wrapper.appendChild(error);
+        }
+        if (error) error.textContent = message;
+    };
+
+    const validateForm = () => {
+        clearErrors();
+        const errors = [];
+        const nameField = contactForm?.querySelector('[name="from_name"]');
+        const emailField = contactForm?.querySelector('[name="email"]');
+        const phoneField = contactForm?.querySelector('[name="phone"]');
+        const serviceField = contactForm?.querySelector('[name="service"]');
+
+        if (nameField && !nameField.value.trim()) {
+            setFieldError(nameField, 'Please enter your name.');
+            errors.push(nameField);
+        }
+
+        if (emailField && !emailField.value.trim()) {
+            setFieldError(emailField, 'Please enter your email address.');
+            errors.push(emailField);
+        } else if (emailField && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailField.value.trim())) {
+            setFieldError(emailField, 'Please enter a valid email address.');
+            errors.push(emailField);
+        }
+
+        if (phoneField && !phoneField.value.trim()) {
+            setFieldError(phoneField, 'Please enter your phone number.');
+            errors.push(phoneField);
+        } else if (phoneField) {
+            const normalizedPhone = phoneField.value.replace(/[\s().-]/g, '');
+            if (!/^(\+63|0)\d{10,11}$/.test(normalizedPhone)) {
+                setFieldError(phoneField, 'Please enter a valid Philippine mobile number.');
+                errors.push(phoneField);
+            }
+        }
+
+        if (serviceField && !serviceField.value) {
+            setFieldError(serviceField, 'Please choose the service you need.');
+            errors.push(serviceField);
+        }
+
+        const firstError = errors[0];
+        if (firstError) {
+            firstError.focus();
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        return true;
     };
 
     const getFormValue = (name) => {
@@ -343,17 +435,29 @@ function initContactForm() {
     };
 
     if (contactForm) {
+        contactForm.addEventListener('input', (event) => {
+            const target = event.target;
+            if (target.classList.contains('is-invalid')) {
+                target.classList.remove('is-invalid');
+                const wrapper = target.closest('label');
+                const error = wrapper?.querySelector('.field-error');
+                if (error) error.remove();
+            }
+        });
+
         contactForm.addEventListener('submit', function(event) {
             event.preventDefault();
-            
+
+            if (!validateForm()) return;
+
             const nameField = contactForm.querySelector('[name="from_name"]');
             const duplicateName = contactForm.querySelector('[name="name"]');
             if (nameField && duplicateName) {
                 duplicateName.value = nameField.value;
             }
 
-            console.log("EmailJS ready:", typeof emailjs !== "undefined");
-            console.log("EmailJS public key configured:", Boolean(EMAILJS_PUBLIC_KEY));
+            console.log('EmailJS ready:', typeof emailjs !== 'undefined');
+            console.log('EmailJS public key configured:', Boolean(EMAILJS_PUBLIC_KEY));
 
             if (!window.emailjs) {
                 showFallbackMessage();
@@ -363,18 +467,19 @@ function initContactForm() {
             setSubmitState(true);
 
             const templateParams = buildBookingPayload();
-            console.log("Booking payload:", templateParams);
+            console.log('Booking payload:', templateParams);
 
             emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
             emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY)
                 .then(function(response) {
-                    console.log("Booking email sent successfully:", response);
-                    showMessage('Your booking request has been sent successfully. DKC will contact you shortly.');
+                    console.log('Booking email sent successfully:', response);
+                    showMessage('Thank you! Your booking request has been received. Our team will contact you shortly.');
                     contactForm.reset();
+                    clearErrors();
                 }, function(error) {
                     showFallbackMessage();
-                    console.error("Booking email failed:", error);
+                    console.error('Booking email failed:', error);
                 })
                 .finally(function() {
                     setSubmitState(false);

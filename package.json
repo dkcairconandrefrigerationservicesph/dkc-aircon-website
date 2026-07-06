@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "node --check script.js && node --check api/koda-chat.js"
+    "check": "node --check script.js && node --check api/koda-chat.js",
+    "build": "npm run check"
   },
   "dependencies": {
     "@google/genai": "^1.52.0"
