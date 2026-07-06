@@ -40,7 +40,24 @@ const kodaEasterConfig = {
     endingButtonText: 'Book Now',
     endingButtonTarget: '#contact',
     lyricFadeDuration: 600,
-    lyricHoldGap: 100
+    lyricHoldGap: 100,
+    lyricPositions: [
+        'position-center',
+        'position-upper-left',
+        'position-upper-right',
+        'position-lower-left',
+        'position-lower-right',
+        'position-left',
+        'position-right'
+    ],
+    flashCardHints: [
+        'late reply',
+        'empty text thread',
+        'cold silence',
+        'midnight thought',
+        'missed goodbye',
+        'frozen moment'
+    ]
 };
 
 let kodaEasterState = {
@@ -531,7 +548,8 @@ function resetKodaEasterState() {
 
 function initKodaEasterEgg() {
     const overlay = document.getElementById('koda-easter-overlay');
-    const lyricEl = document.getElementById('koda-easter-lyric');
+    const lyricStack = document.getElementById('koda-easter-lyric-stack');
+    const cardLayer = document.querySelector('.koda-easter-card-layer');
     const endingEl = document.getElementById('koda-easter-ending');
     const endingQuote = document.getElementById('koda-easter-ending-quote');
     const endingHeading = document.getElementById('koda-easter-ending-heading');
@@ -540,7 +558,7 @@ function initKodaEasterEgg() {
     const closeButton = document.querySelector('.koda-easter-close');
     const audio = document.getElementById('koda-easter-audio');
 
-    if (!overlay || !lyricEl || !endingEl || !endingQuote || !endingHeading || !endingSubheading || !endingCta || !closeButton || !audio) {
+    if (!overlay || !lyricStack || !cardLayer || !endingEl || !endingQuote || !endingHeading || !endingSubheading || !endingCta || !closeButton || !audio) {
         return;
     }
 
@@ -554,54 +572,124 @@ function initKodaEasterEgg() {
     audio.loop = false;
     audio.volume = 0.9;
 
-    const closeOverlay = () => {
-        overlay.classList.remove('is-active', 'phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale', 'blackout');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('koda-easter-open');
-        document.documentElement.classList.remove('koda-easter-open');
-        document.body.style.overflow = '';
-        lyricEl.textContent = '';
-        lyricEl.classList.remove('visible');
-        endingEl.classList.remove('visible');
-        overlay.style.pointerEvents = 'none';
-        audio.pause();
-        audio.currentTime = 0;
-        resetKodaEasterState();
+    const getRandomItem = (array) => array[Math.floor(Math.random() * array.length)];
+
+    const clearLyricStack = () => {
+        lyricStack.innerHTML = '';
+        kodaEasterState.currentLyricIndex = -1;
+    };
+
+    const clearFlashCards = () => {
+        cardLayer.innerHTML = '';
+    };
+
+    const createFlashCard = () => {
+        const card = document.createElement('div');
+        card.className = 'koda-easter-flash-card';
+        card.innerHTML = '<span></span>';
+        cardLayer.appendChild(card);
+        return card;
+    };
+
+    const buildLyricLine = (text, positionClass) => {
+        const line = document.createElement('div');
+        line.className = `koda-easter-lyric-line ${positionClass}`;
+        line.textContent = text;
+        return line;
+    };
+
+    const getPositionClass = (index) => {
+        const positions = kodaEasterConfig.lyricPositions;
+        return positions[index % positions.length];
+    };
+
+    const showFlashCard = (index) => {
+        const flashHints = kodaEasterConfig.flashCardHints;
+        const cards = cardLayer.querySelectorAll('.koda-easter-flash-card');
+        if (!cards.length) return;
+
+        const card = cards[index % cards.length];
+        const hint = getRandomItem(flashHints);
+        const size = 220 + Math.round(Math.random() * 100);
+        const top = 12 + Math.round(Math.random() * 62);
+        const left = Math.round(Math.random() * 68);
+        const rotation = -8 + Math.round(Math.random() * 16);
+        const hues = ['255,241,229', '219,237,255', '255,214,221'];
+        const tint = getRandomItem(hues);
+
+        card.style.width = `${size}px`;
+        card.style.height = `${size * 0.78}px`;
+        card.style.top = `${top}%`;
+        card.style.left = `${left}%`;
+        card.style.setProperty('--rotate', `${rotation}deg`);
+        card.style.background = `rgba(${tint}, 0.14)`;
+        card.querySelector('span').textContent = hint;
+        card.classList.add('visible');
+
+        setTimeout(() => {
+            card.classList.remove('visible');
+        }, 1400);
+    };
+
+    const setOverlayMood = (index) => {
+        overlay.classList.remove('phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale');
+        if (index >= 10) {
+            overlay.classList.add('phase-finale');
+        } else if (index >= 7) {
+            overlay.classList.add('phase-peak');
+        } else if (index >= 4) {
+            overlay.classList.add('phase-grow');
+        } else {
+            overlay.classList.add('phase-quiet');
+        }
+
+        overlay.classList.toggle('beat-cut', index === 4 || index === 7 || index === 9);
+    };
+
+    const fadeOutOldLines = () => {
+        const lines = lyricStack.querySelectorAll('.koda-easter-lyric-line');
+        if (lines.length <= 3) return;
+        const [first] = lines;
+        first.classList.add('remove');
+        setTimeout(() => {
+            if (first.parentElement) {
+                first.parentElement.removeChild(first);
+            }
+        }, 600);
     };
 
     const showLyric = (index) => {
         if (kodaEasterState.currentLyricIndex === index) return;
         const lyric = kodaEasterConfig.lyricTimings[index]?.text || '';
         kodaEasterState.currentLyricIndex = index;
-
-        const updateVisualPhase = () => {
-            overlay.classList.remove('phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale');
-            if (index >= 10) {
-                overlay.classList.add('phase-finale');
-            } else if (index >= 7) {
-                overlay.classList.add('phase-peak');
-            } else if (index >= 4) {
-                overlay.classList.add('phase-grow');
-            } else {
-                overlay.classList.add('phase-quiet');
-            }
-        };
-
-        updateVisualPhase();
+        setOverlayMood(index);
 
         if (!lyric) {
-            lyricEl.classList.remove('visible');
+            const remainingDelay = 250 + kodaEasterConfig.lyricHoldGap;
             kodaEasterState.resetTimeoutId = setTimeout(() => {
                 startEndingSequence();
-            }, 250 + kodaEasterConfig.lyricHoldGap);
+            }, remainingDelay);
             return;
         }
 
-        lyricEl.classList.remove('visible');
-        kodaEasterState.resetTimeoutId = setTimeout(() => {
-            lyricEl.textContent = lyric;
-            lyricEl.classList.add('visible');
-        }, 150);
+        const positionClass = getPositionClass(index);
+        const newLine = buildLyricLine(lyric, positionClass);
+        lyricStack.appendChild(newLine);
+
+        requestAnimationFrame(() => {
+            const previousLines = lyricStack.querySelectorAll('.koda-easter-lyric-line.visible');
+            previousLines.forEach(line => {
+                line.classList.remove('visible');
+                line.classList.add('past');
+            });
+            newLine.classList.add('visible');
+        });
+
+        fadeOutOldLines();
+
+        if (index === 1 || index === 4 || index === 7 || index === 9) {
+            showFlashCard(index);
+        }
     };
 
     const startEndingSequence = () => {
@@ -629,20 +717,41 @@ function initKodaEasterEgg() {
 
     const openOverlay = () => {
         resetKodaEasterState();
+        clearLyricStack();
+        clearFlashCards();
+
         overlay.classList.add('is-active');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('koda-easter-open');
         document.documentElement.classList.add('koda-easter-open');
         document.body.style.overflow = 'hidden';
         endingEl.classList.remove('visible');
-        lyricEl.textContent = '';
-        lyricEl.classList.remove('visible');
         overlay.classList.remove('blackout');
         overlay.classList.add('phase-quiet');
         overlay.style.pointerEvents = 'auto';
+
+        for (let i = 0; i < 4; i += 1) {
+            createFlashCard();
+        }
+
         audio.currentTime = 0;
         audio.play().catch(() => {});
         showLyric(0);
+    };
+
+    const closeOverlay = () => {
+        overlay.classList.remove('is-active', 'phase-quiet', 'phase-grow', 'phase-peak', 'phase-finale', 'blackout', 'beat-cut');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('koda-easter-open');
+        document.documentElement.classList.remove('koda-easter-open');
+        document.body.style.overflow = '';
+        clearLyricStack();
+        clearFlashCards();
+        endingEl.classList.remove('visible');
+        overlay.style.pointerEvents = 'none';
+        audio.pause();
+        audio.currentTime = 0;
+        resetKodaEasterState();
     };
 
     closeButton.addEventListener('click', closeOverlay);

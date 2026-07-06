@@ -767,49 +767,190 @@ body.koda-easter-open > :not(#koda-easter-overlay) * {
 
 .koda-easter-stage {
     width: min(100%, 92vw);
-    min-height: 200px;
+    min-height: 260px;
+    position: relative;
     display: grid;
     place-items: center;
     padding: 0 10px;
 }
 
-.koda-easter-lyric {
+.koda-easter-card-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.koda-easter-lyric-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+.koda-easter-lyric-line {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: min(92vw, 880px);
     max-width: 92vw;
-    margin: 0 auto;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: clamp(2rem, 5vw, 4rem);
-    line-height: 1.05;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: clamp(2.2rem, 5vw, 5rem);
+    line-height: 1.02;
     letter-spacing: -0.03em;
-    color: #f5eee1;
+    color: rgba(245, 238, 229, 0.98);
+    text-align: center;
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translate3d(0, 12px, 0) scale(0.98);
     filter: blur(8px);
     transition: opacity 0.55s ease, transform 0.55s ease, filter 0.55s ease, text-shadow 0.55s ease;
-    text-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
-    padding: 0 14px;
+    text-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+    padding: 0 12px;
     white-space: pre-line;
 }
 
-.koda-easter-lyric.visible {
+.koda-easter-lyric-line.visible {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
     filter: blur(0);
 }
 
-.koda-easter-overlay.phase-quiet .koda-easter-lyric {
-    text-shadow: 0 14px 34px rgba(0, 0, 0, 0.23);
+.koda-easter-lyric-line.past {
+    opacity: 0.16;
+    filter: blur(12px);
+    transform: translate3d(0, -24px, 0) scale(0.94);
+    text-shadow: 0 18px 70px rgba(0, 0, 0, 0.22);
 }
 
-.koda-easter-overlay.phase-grow .koda-easter-lyric {
-    text-shadow: 0 22px 52px rgba(0, 0, 0, 0.32);
+.koda-easter-lyric-line.remove {
+    opacity: 0;
+    filter: blur(16px);
+    transform: translate3d(0, -28px, 0) scale(0.92);
 }
 
-.koda-easter-overlay.phase-peak .koda-easter-lyric {
-    text-shadow: 0 30px 72px rgba(0, 0, 0, 0.42);
+.koda-easter-lyric-line.position-center {
+    top: 48%;
+    left: 50%;
+    width: min(92vw, 760px);
+    transform: translate(-50%, -50%) scale(0.98);
 }
 
-.koda-easter-overlay.phase-finale .koda-easter-lyric {
-    text-shadow: 0 26px 64px rgba(0, 0, 0, 0.45);
+.koda-easter-lyric-line.position-upper {
+    top: 16%;
+    left: 52%;
+    transform: translate(-50%, 0) scale(0.96);
+}
+
+.koda-easter-lyric-line.position-lower {
+    top: 74%;
+    left: 50%;
+    transform: translate(-50%, -100%) scale(0.96);
+}
+
+.koda-easter-lyric-line.position-left,
+.koda-easter-lyric-line.position-right,
+.koda-easter-lyric-line.position-upper-left,
+.koda-easter-lyric-line.position-upper-right,
+.koda-easter-lyric-line.position-lower-left,
+.koda-easter-lyric-line.position-lower-right {
+    width: min(60vw, 420px);
+}
+
+.koda-easter-lyric-line.position-left {
+    top: 34%;
+    left: 14%;
+    transform: translate(0, -50%) scale(0.96);
+    text-align: left;
+}
+
+.koda-easter-lyric-line.position-right {
+    top: 36%;
+    right: 12%;
+    transform: translate(0, -50%) scale(0.96);
+    text-align: right;
+}
+
+.koda-easter-lyric-line.position-upper-left {
+    top: 16%;
+    left: 14%;
+    transform: translate(0, 0) scale(0.94);
+    text-align: left;
+}
+
+.koda-easter-lyric-line.position-upper-right {
+    top: 18%;
+    right: 14%;
+    transform: translate(0, 0) scale(0.98);
+    text-align: right;
+}
+
+.koda-easter-lyric-line.position-lower-left {
+    bottom: 18%;
+    left: 14%;
+    transform: translate(0, 0) scale(0.98);
+    text-align: left;
+}
+
+.koda-easter-lyric-line.position-lower-right {
+    bottom: 18%;
+    right: 14%;
+    transform: translate(0, 0) scale(0.98);
+    text-align: right;
+}
+
+.koda-easter-flash-card {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    border-radius: 32px;
+    filter: blur(20px) saturate(1.1);
+    opacity: 0;
+    mix-blend-mode: screen;
+    transform: scale(0.96) rotate(var(--rotate, 0deg));
+    transition: opacity 0.2s ease, transform 0.2s ease, top 0.3s ease, left 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 48px 140px rgba(0, 0, 0, 0.2);
+}
+
+.koda-easter-flash-card.visible {
+    opacity: 1;
+    transform: scale(1.02) translateY(-5px) rotate(var(--rotate, 0deg));
+}
+
+.koda-easter-flash-card span {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    opacity: 0.95;
+    text-transform: uppercase;
+}
+
+.koda-easter-flash-card.visible {
+    opacity: 1;
+    transform: scale(1) translateY(-5px);
+}
+
+.koda-easter-overlay.beat-cut {
+    filter: brightness(1.08);
+}
+
+.koda-easter-overlay.phase-quiet .koda-easter-shell {
+    opacity: 1;
+}
+
+.koda-easter-overlay.phase-grow .koda-easter-shell {
+    transform: scale(1.005);
+}
+
+.koda-easter-overlay.phase-peak .koda-easter-shell {
+    transform: scale(1.01);
+}
+
+.koda-easter-overlay.phase-finale .koda-easter-shell {
+    transform: scale(1.0);
 }
 
 .koda-easter-close {
