@@ -17,8 +17,8 @@ const kodaEasterConfig = {
         "heaven's gate",
         'i abdicate'
     ],
-    // Path to the audio/video file used for the hidden Easter egg.
-    mediaPath: '/laufeysoundbg.mp4',
+    // Path to the audio file used for the hidden Easter egg.
+    mediaPath: '/sounds/laufeysoundbg.mp3',
     // Editable lyric timing array. Each timestamp is the moment the lyric appears.
     lyricTimings: [
         { time: 0.0, text: 'I swear to God, I almost drowned' },

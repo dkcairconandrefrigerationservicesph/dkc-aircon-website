@@ -706,7 +706,9 @@ body {
     display: grid;
     place-items: center;
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(6, 12, 20, 0.96), rgba(1, 4, 10, 0.98));
+    background: rgba(6, 12, 20, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -717,6 +719,19 @@ body {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+}
+
+body.koda-easter-open > :not(#koda-easter-overlay) {
+    filter: blur(10px) brightness(0.35) contrast(0.88) saturate(0.8);
+    transform: scale(1.01);
+    opacity: 0.92;
+    transition: filter 0.8s ease, transform 0.8s ease, opacity 0.8s ease;
+    pointer-events: none;
+    user-select: none;
+}
+
+body.koda-easter-open > :not(#koda-easter-overlay) * {
+    pointer-events: none;
 }
 
 .koda-easter-overlay::before {
